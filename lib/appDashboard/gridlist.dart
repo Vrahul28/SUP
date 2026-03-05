@@ -12,17 +12,17 @@ List<Items> staff = [item2];
 
 List<Items> visitor = [item2];
 
-Items item1 = new Items(
+Items item1 = Items(
     title: "Company",
     img: "assets/images/company.png"
 );
 
-Items item2 = new Items(
+Items item2 = Items(
   title: "Staff",
   img: "assets/images/staff.png",
 );
 
-Items item3 = new Items(
+Items item3 = Items(
   title: "Blacklist",
   img: "assets/images/blacklist.png",
 );
@@ -75,17 +75,17 @@ class Vistor {
 List<Vistor> adminVistor= [v1, v2, v3];
 List<Vistor> onlyinvite= [v3];
 
-Vistor  v1 = new Vistor(
+Vistor  v1 = Vistor(
     title: "Email Template",
     img: "assets/images/home.png"
 );
 
-Vistor  v2 = new Vistor(
+Vistor  v2 = Vistor(
     title: "Report",
     img: "assets/images/home.png"
 );
 
-Vistor  v3 = new Vistor(
+Vistor  v3 = Vistor(
     title: "Invitation",
     img: "assets/images/home.png"
 );

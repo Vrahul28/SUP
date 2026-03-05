@@ -44,13 +44,13 @@ class Grid3 extends StatelessWidget {
             if (data.title == "Facility Booking") {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const Facilitybooking()),
+                MaterialPageRoute(builder: (context) => const FacilityBooking()),
               );
             }
             if (data.title == "Permit To Work") {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const Permittowork()),
+                MaterialPageRoute(builder: (context) => const PermitToWork()),
               );
             }
 

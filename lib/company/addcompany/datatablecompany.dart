@@ -1,27 +1,29 @@
 import 'package:acp/Provider/Company/DataTable_Provider.dart';
+import 'package:acp/Provider/Company/Insert_Company_Provider.dart';
 import 'package:acp/Provider/Company/View_Company_Provider.dart';
 import 'package:acp/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../../Provider/Company/Company_Provider.dart';
 import '../companymodel.dart';
 import '../companyscreen.dart';
 import 'addcompany.dart';
 
-class Datatablecompany extends StatefulWidget {
-  const Datatablecompany({super.key});
+class DatatableCompany extends StatefulWidget {
+  const DatatableCompany({super.key});
 
   @override
-  State<Datatablecompany> createState() => _DatatablecompanyState();
+  State<DatatableCompany> createState() => _DatatableCompanyState();
 }
 bool isFirstRow= false;
 late int currentIndex;
 
-class _DatatablecompanyState extends State<Datatablecompany> {
+class _DatatableCompanyState extends State<DatatableCompany> {
   @override
   Widget build(BuildContext context) {
-    final viewcompanyProvider= Provider.of<ViewCompanyProvider>(context, listen: false);
-    final dataTableProvider= Provider.of<DatatableProvider>(context);
+    final company= context.read<CompanyProvider>();
+    final insertCompany= context.read<InsertCompanyProvider>();
     return Padding(
       padding: const EdgeInsets.only(left: 0.0, right: 0.0),
       child: Container(
@@ -30,7 +32,7 @@ class _DatatablecompanyState extends State<Datatablecompany> {
           border: Border.all(color: Colors.black),
         ),
           child: FutureBuilder(
-            future: viewcompanyProvider.viewCompanyList(companylistid),
+            future: company.viewCompanyList(company.companyListid),
             // future: db.getaddCompanydata1(companylistid),
             builder: (context, snapshot) {
               if(snapshot.connectionState == ConnectionState.waiting){
@@ -44,7 +46,7 @@ class _DatatablecompanyState extends State<Datatablecompany> {
               }else{
                 return SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    child: Consumer<ViewCompanyProvider>(
+                    child: Consumer<CompanyProvider>(
                       builder: (context, value, child) {
                         return DataTable(
                         border: TableBorder.all(
@@ -58,7 +60,7 @@ class _DatatablecompanyState extends State<Datatablecompany> {
                         DataColumn(label: Text('Area')),
                         DataColumn(label: Text('Occupancy')),
                         DataColumn(label: Text('Staff No')),
-                          if(viewcompany == false)
+                          if(insertCompany.viewCompany == false)
                             DataColumn(label: Text('Action')),
                       ],
                         rows: _generateDataRows(value.viewCompanyData),
@@ -83,7 +85,9 @@ class _DatatablecompanyState extends State<Datatablecompany> {
         ),
     );
   }
+
   List<DataRow> _generateDataRows(List<Company> companyData) {
+    final insertCompany= context.read<InsertCompanyProvider>();
     List<DataRow> rows = [];
 
     for (var dataRow in companyData) {
@@ -105,7 +109,7 @@ class _DatatablecompanyState extends State<Datatablecompany> {
               DataCell(Text(i < areas!.length ? areas[i] : '')),
               DataCell(Text(i < occupancies!.length ? occupancies[i] : '')),
               DataCell(Text(i < staffNumbers!.length ? staffNumbers[i] : '')),
-              if (viewcompany == false)
+              if (insertCompany.viewCompany == false)
                 DataCell(
                   IconButton(
                     icon: Icon(Icons.more_vert),
@@ -132,15 +136,15 @@ class _DatatablecompanyState extends State<Datatablecompany> {
                                 ],
                               ),
                               onTap: () {
-                                isedited= true;
-                                id1= i;
+                                insertCompany.isEdited= true;
+                                insertCompany.id1= i;
 
-                                towercompany.text= towers[i];
-                                floor.text = i < floors.length ? floors[i] : '';
-                                unitno.text = i < units.length ? units[i] : '';
-                                area.text = i < areas.length ? areas[i] : '';
-                                occupancy.text = i < occupancies.length ? occupancies[i] : '';
-                                staffno.text = i < staffNumbers.length ? staffNumbers[i] : '';
+                                insertCompany.towerCompany.text= towers[i];
+                                insertCompany.floor.text = i < floors.length ? floors[i] : '';
+                                insertCompany.unitNo.text = i < units.length ? units[i] : '';
+                                insertCompany.area.text = i < areas.length ? areas[i] : '';
+                                insertCompany.occupancy.text = i < occupancies.length ? occupancies[i] : '';
+                                insertCompany.staffNo.text = i < staffNumbers.length ? staffNumbers[i] : '';
 
                                 Navigator.pop(context);
                               },

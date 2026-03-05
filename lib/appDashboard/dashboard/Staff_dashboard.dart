@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../login.dart';
+import '../../login/login.dart';
 import '../../staff/database/dbhelper.dart';
 import '../../utils/colors.dart';
 
@@ -16,8 +16,8 @@ class StaffDashboard extends StatefulWidget {
 class _StaffDashboardState extends State<StaffDashboard> {
 
   String totalStaffCount3 = '';
-  DBhelper db= DBhelper.db;
-  bool user= (usernameController.text =="ara@gmail.com");
+  DBHelper db= DBHelper.db;
+  // bool user= (usernameController.text =="ara@gmail.com");
 
   Future<void> updateTotalStaffCount() async {
 
@@ -35,6 +35,7 @@ class _StaffDashboardState extends State<StaffDashboard> {
     updateTotalStaffCount();
   }
 
+  @override
   Widget build(BuildContext context) {
     return GridView.count(
       padding: EdgeInsets.symmetric(horizontal: 50),
@@ -75,7 +76,6 @@ class _StaffDashboardState extends State<StaffDashboard> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-
                   ),
                 ],
               ),

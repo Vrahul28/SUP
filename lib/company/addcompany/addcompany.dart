@@ -1,3 +1,4 @@
+import 'package:acp/Provider/Company/Company_Provider.dart';
 import 'package:acp/Provider/Company/Insert_Company_Provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import '../../Provider/Company/DataTable_Provider.dart';
-import '../../Provider/Company/Edit_Company_Provider.dart';
 import '../../staff/addstaff/addstaffmethods.dart';
 import '../../utils/Textform_field.dart';
 import '../../utils/colors.dart';
@@ -13,54 +13,19 @@ import '../DataTable_Insert.dart';
 import '../companyscreen.dart';
 import 'datatablecompany.dart';
 
-class Addcompany extends StatefulWidget {
-  const Addcompany({super.key});
+class AddCompany extends StatefulWidget {
+  const AddCompany({super.key});
 
   @override
-  State<Addcompany> createState() => _AddcompanyState();
+  State<AddCompany> createState() => _AddCompanyState();
 }
-late int id1;
-late int id2;
-List<String> towers= [];
 
-TextEditingController companyname= TextEditingController();
-TextEditingController displayname= TextEditingController();
-TextEditingController uag= TextEditingController();
-TextEditingController contactname= TextEditingController();
-TextEditingController contactno= TextEditingController();
-TextEditingController towercompany= TextEditingController();
-TextEditingController floor= TextEditingController();
-TextEditingController unitno= TextEditingController();
-TextEditingController area= TextEditingController();
-TextEditingController occupancy= TextEditingController();
-TextEditingController staffno= TextEditingController();
-late int count;
-bool isupdatecompany= false;
-bool isaddcompany= false;
-bool isSwitchOn = false;
-bool isSwitchOn2 = false;
-bool isSwitchOn3 = false;
-bool isSwitchOn4 = false;
-bool viewcompany= false;
-bool isedited= false;
-
-String tower11= "";
-String unitno11= "";
-
-
-class _AddcompanyState extends State<Addcompany> {
+class _AddCompanyState extends State<AddCompany> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  List<String> floors= [];
-  List<String> unitnos= [];
-  List<String> areas= [];
-  List<String> occupancys= [];
-  List<String> staffnos= [];
-  // DBhelper dBhelper1= DBhelper.db;
   @override
   Widget build(BuildContext context) {
-    final insertCompany= Provider.of<InsertCompanyProvider>(context, listen: false);
-    final editeCompanyProvider= Provider.of<EditCompanyProvider>(context, listen: false);
+    final companyPro= context.read<CompanyProvider>();
+    final company= Provider.of<InsertCompanyProvider>(context, listen: false);
     return Material(
       child: Scaffold(
         body: Form(
@@ -69,7 +34,7 @@ class _AddcompanyState extends State<Addcompany> {
             slivers: <Widget>[
                 SliverAppBar(
                   backgroundColor: kDarkblueColor,
-                  title: viewcompany?Text("Company",
+                  title: company.viewCompany?Text("Company",
                     style: GoogleFonts.poppins(
                       fontSize: 25.0,
                       fontWeight: FontWeight.w600,
@@ -90,37 +55,30 @@ class _AddcompanyState extends State<Addcompany> {
 
                     ),
                     onPressed: () {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (BuildContext context) => const Companyscreen(),
-                        ),
-                      );
-                     isadd= false;
-                      viewcompany=false;
-                      isupdatecompany= false;
-                      isedited= false;
-                      companyname.clear();
-                      displayname.clear();
-                      uag.clear();
-                      contactname.clear();
-                      contactno.clear();
-                      towercompany.clear();
-                      floor.clear();
-                      unitno.clear();
-                      area.clear();
-                      occupancy.clear();
-                      staffno.clear();
+                      Navigator.pop(context);
+                      // Navigator.of(context).pushReplacement(
+                      //   MaterialPageRoute(
+                      //     builder: (BuildContext context) => const CompanyScreen(),
+                      //   ),
+                      // );
+                      companyPro.isAdd= false;
+
+                      company.viewCompany=false;
+                      company.isUpdateCompany= false;
+                      company.isEdited= false;
+
+                      company.clearController();
 
                       setState(() {
-                        isSwitchOn = false;
-                        isSwitchOn2 = false;
-                        isSwitchOn3 = false;
-                        isSwitchOn4 = false;
+                        company.isSwitchOn = false;
+                        company.isSwitchOn2 = false;
+                        company.isSwitchOn3 = false;
+                        company.isSwitchOn4 = false;
                       });
-                      isadd=false;
-                      viewcompany = false;
-                      isupdatecompany= false;
-                      isedited= false;
+                      companyPro.isAdd=false;
+                      company.viewCompany = false;
+                      company.isUpdateCompany= false;
+                      company.isEdited= false;
                     },
                   ),
                 ),
@@ -142,7 +100,7 @@ class _AddcompanyState extends State<Addcompany> {
                                 lines: 1,
                                 errorMsg: 'Company Name Required',
                                 hinttext: 'Company Name',
-                                controller: companyname,
+                                controller: company.companyName,
                               )
                             ),
                             Padding(
@@ -153,10 +111,10 @@ class _AddcompanyState extends State<Addcompany> {
                                 lines: 1,
                                 errorMsg: 'Kiosk Display Name Required',
                                 hinttext: 'Kiosk Display Name',
-                                controller: displayname,
+                                controller: company.displayName,
                               )
                             ),
-                            Uag1(controller1: uag, hint: "UAG",),
+                            Uag1(controller1: company.uag, hint: "UAG",),
                             Padding(
                               padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
                               child: CustomTextfield(
@@ -165,7 +123,7 @@ class _AddcompanyState extends State<Addcompany> {
                                 lines: 1,
                                 errorMsg: 'Contact Name Required',
                                 hinttext: 'Contact Name',
-                                controller: contactname,
+                                controller: company.contactName,
                               ),
                             ),
                             Padding(
@@ -176,85 +134,85 @@ class _AddcompanyState extends State<Addcompany> {
                                 lines: 1,
                                 errorMsg: 'Contact No. Required',
                                 hinttext: 'Contact No.',
-                                controller: contactno,
+                                controller: company.contactNo,
                               ),
                             ),
-                            if(viewcompany == false)
+                            if(company.viewCompany == false)
                               Stack(
                                 children: [
-                                  Location(controller1: towercompany, hint: "Tower",),
+                                  Location(controller1: company.towerCompany, hint: "Tower",),
                                   Positioned(
                                     top: 2.0,
                                       right: 8.0,
                                       child: IconButton(
                                         onPressed: () async {
-                                          if(isadd== false && isedited==false && isupdatecompany == false){
+                                          if(companyPro.isAdd== false && company.isEdited==false && company.isUpdateCompany == false){
                                             Provider.of<DatatableProvider>(context, listen: false).addCompanyData(
-                                              tower: towercompany.text,
-                                              floor: floor.text,
-                                              unitno: unitno.text,
-                                              area: area.text,
-                                              occupancy: occupancy.text,
-                                              staffno: staffno.text,
+                                              tower: company.towerCompany.text,
+                                              floor: company.floor.text,
+                                              unitno: company.unitNo.text,
+                                              area: company.area.text,
+                                              occupancy: company.occupancy.text,
+                                              staffno: company.staffNo.text,
                                             );
 
-                                              towercompany.clear();
-                                              floor.clear();
-                                              unitno.clear();
-                                              area.clear();
-                                              occupancy.clear();
-                                              staffno.clear();
+                                            company.towerCompany.clear();
+                                            company.floor.clear();
+                                            company.unitNo.clear();
+                                            company.area.clear();
+                                            company.occupancy.clear();
+                                            company.staffNo.clear();
 
-                                          }else if(isedited == true && isadd== false && isupdatecompany == false){
+                                          }else if(company.isEdited == true && companyPro.isAdd== false && company.isUpdateCompany == false){
                                             Provider.of<DatatableProvider>(context, listen: false).updateCompanyData(
-                                              index: id1,
-                                              tower: towercompany.text,
-                                              floor: floor.text,
-                                              unitno: unitno.text,
-                                              area: area.text,
-                                              occupancy: occupancy.text,
-                                              staffno: staffno.text,
+                                              index: company.id1,
+                                              tower: company.towerCompany.text,
+                                              floor: company.floor.text,
+                                              unitno: company.unitNo.text,
+                                              area: company.area.text,
+                                              occupancy: company.occupancy.text,
+                                              staffno: company.staffNo.text,
                                             );
 
 
-                                            print("isedit: $isedited");
+                                            debugPrint("isedit: ${company.isEdited}");
 
-                                            towercompany.clear();
-                                            floor.clear();
-                                            unitno.clear();
-                                            area.clear();
-                                            occupancy.clear();
-                                            staffno.clear();
+                                            company.towerCompany.clear();
+                                            company.floor.clear();
+                                            company.unitNo.clear();
+                                            company.area.clear();
+                                            company.occupancy.clear();
+                                            company.staffNo.clear();
 
-                                          }else if(isupdatecompany== true && isedited== true && viewcompany == false && isadd == false){
+                                          }else if(company.isUpdateCompany== true && company.isEdited== true && company.viewCompany == false && companyPro.isAdd == false){
                                             Provider.of<DatatableProvider>(context, listen: false).updateCompanyData(
-                                              index: id1,
-                                              tower: towercompany.text,
-                                              floor: floor.text,
-                                              unitno: unitno.text,
-                                              area: area.text,
-                                              occupancy: occupancy.text,
-                                              staffno: staffno.text,
+                                              index: company.id1,
+                                              tower: company.towerCompany.text,
+                                              floor: company.floor.text,
+                                              unitno: company.unitNo.text,
+                                              area: company.area.text,
+                                              occupancy: company.occupancy.text,
+                                              staffno: company.staffNo.text,
                                             );
 
-                                            print("isUpdateCompany: $isupdatecompany");
+                                            debugPrint("isUpdateCompany: ${company.isUpdateCompany}");
 
-                                            towercompany.clear();
-                                            floor.clear();
-                                            unitno.clear();
-                                            area.clear();
-                                            occupancy.clear();
-                                            staffno.clear();
+                                            company.towerCompany.clear();
+                                            company.floor.clear();
+                                            company.unitNo.clear();
+                                            company.area.clear();
+                                            company.occupancy.clear();
+                                            company.staffNo.clear();
 
-                                          }else if(isupdatecompany== true && isedited== false && viewcompany == false && isadd == false){
+                                          }else if(company.isUpdateCompany== true && company.isEdited== false && company.viewCompany == false && companyPro.isAdd == false){
                                             Provider.of<DatatableProvider>(context, listen: false).updateCompanyData(
-                                              index: id1,
-                                              tower: towercompany.text,
-                                              floor: floor.text,
-                                              unitno: unitno.text,
-                                              area: area.text,
-                                              occupancy: occupancy.text,
-                                              staffno: staffno.text,
+                                              index: company.id1,
+                                              tower: company.towerCompany.text,
+                                              floor: company.floor.text,
+                                              unitno: company.unitNo.text,
+                                              area: company.area.text,
+                                              occupancy: company.occupancy.text,
+                                              staffno: company.staffNo.text,
                                             );
                                           }
                                         },
@@ -268,9 +226,9 @@ class _AddcompanyState extends State<Addcompany> {
                                 ],
                               ),
 
-                            if(viewcompany==true)
-                              Location(controller1: towercompany, hint: "Tower",),
-                           FloorTextField(controller1: floor, hint: 'Floor'),
+                            if(company.viewCompany==true)
+                              Location(controller1: company.towerCompany, hint: "Tower",),
+                           FloorTextField(controller1: company.floor, hint: 'Floor'),
                             Padding(
                               padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
                               child: TextFormField(
@@ -281,7 +239,7 @@ class _AddcompanyState extends State<Addcompany> {
                                   fontSize: 15.0,
                                 ),
                                 keyboardType: TextInputType.number,
-                                controller: unitno,
+                                controller: company.unitNo,
                                 decoration: InputDecoration(
                                   contentPadding: const EdgeInsets.all(18.0),
                                   filled: true,
@@ -319,7 +277,7 @@ class _AddcompanyState extends State<Addcompany> {
                                   fontSize: 15.0,
                                 ),
                                 keyboardType: TextInputType.number,
-                                controller: area,
+                                controller: company.area,
                                 decoration: InputDecoration(
                                   contentPadding: const EdgeInsets.all(18.0),
                                   filled: true,
@@ -357,7 +315,7 @@ class _AddcompanyState extends State<Addcompany> {
                                   fontSize: 15.0,
                                 ),
                                 keyboardType: TextInputType.number,
-                                controller: occupancy,
+                                controller: company.occupancy,
                                 decoration: InputDecoration(
                                   contentPadding: const EdgeInsets.all(18.0),
                                   filled: true,
@@ -395,7 +353,7 @@ class _AddcompanyState extends State<Addcompany> {
                                   fontSize: 15.0,
                                 ),
                                 keyboardType: TextInputType.number,
-                                controller: staffno,
+                                controller: company.staffNo,
                                 decoration: InputDecoration(
                                   contentPadding: const EdgeInsets.all(18.0),
                                   filled: true,
@@ -430,10 +388,10 @@ class _AddcompanyState extends State<Addcompany> {
                                   CupertinoSwitch(
                                     trackColor: Colors.white,
                                     activeColor: kDarkblueColor,
-                                    value: isSwitchOn,
+                                    value: company.isSwitchOn,
                                     onChanged: (bool value) {
                                       setState(() {
-                                        isSwitchOn = value;
+                                        company.isSwitchOn = value;
                                       });
                                     },
                                   ),
@@ -461,10 +419,10 @@ class _AddcompanyState extends State<Addcompany> {
                                   CupertinoSwitch(
                                     trackColor: Colors.white,
                                     activeColor: kDarkblueColor,
-                                    value: isSwitchOn2,
+                                    value: company.isSwitchOn2,
                                     onChanged: (bool value) {
                                       setState(() {
-                                        isSwitchOn2 = value;
+                                        company.isSwitchOn2 = value;
                                       });
                                     },
                                   ),
@@ -492,10 +450,10 @@ class _AddcompanyState extends State<Addcompany> {
                                   CupertinoSwitch(
                                     trackColor: Colors.white,
                                     activeColor: kDarkblueColor,
-                                    value: isSwitchOn3,
+                                    value: company.isSwitchOn3,
                                     onChanged: (bool value) {
                                       setState(() {
-                                        isSwitchOn3 = value;
+                                        company.isSwitchOn3 = value;
                                       });
                                     },
                                   ),
@@ -526,10 +484,10 @@ class _AddcompanyState extends State<Addcompany> {
                                   CupertinoSwitch(
                                     trackColor: Colors.white,
                                     activeColor: kDarkblueColor,
-                                    value: isSwitchOn4,
+                                    value: company.isSwitchOn4,
                                     onChanged: (bool value) {
                                       setState(() {
-                                        isSwitchOn4 = value;
+                                        company.isSwitchOn4 = value;
                                       });
                                     },
                                   ),
@@ -554,7 +512,7 @@ class _AddcompanyState extends State<Addcompany> {
                             const SizedBox(
                               height: 10,
                             ),
-                            if(viewcompany == false && isupdatecompany == false)
+                            if(company.viewCompany == false && company.isUpdateCompany == false)
                               Consumer<DatatableProvider>(builder: (context, value, child) {
                                  return  DatatableInsert(
                                    length: value.towers.length,
@@ -566,11 +524,11 @@ class _AddcompanyState extends State<Addcompany> {
                                    staffNos: value.staffnos,
                                  ) ;
                                }),
-                            if(viewcompany== true && isupdatecompany == false && isadd== false)
-                              const Datatablecompany(),
-                            if(isupdatecompany == true && viewcompany == false)
+                            if(company.viewCompany== true && company.isUpdateCompany == false && companyPro.isAdd== false)
+                              const DatatableCompany(),
+                            if(company.isUpdateCompany == true && company.viewCompany == false)
                               Visibility(
-                                visible: isupdatecompany,
+                                visible: company.isUpdateCompany,
                                   child: Consumer<DatatableProvider>(builder: (context, value, child) {
                                     return  DatatableInsert(
                                       length: value.towers.length,
@@ -587,7 +545,7 @@ class _AddcompanyState extends State<Addcompany> {
                             const SizedBox(
                               height: 20,
                             ),
-                            if(viewcompany == false)
+                            if(company.viewCompany == false)
                               Padding(
                                 padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
                                 child: SizedBox(
@@ -596,77 +554,131 @@ class _AddcompanyState extends State<Addcompany> {
                                   child: ElevatedButton(
                                     onPressed: () async{
                                       if(_formKey.currentState!.validate()){
-                                        if(isadd==false && viewcompany == false && isedited == false && isupdatecompany == false){
-                                          print("insert");
+                                        if(companyPro.isAdd==false && company.viewCompany == false && company.isEdited == false && company.isUpdateCompany == false){
+                                          debugPrint("insert");
                                           final value= Provider.of<DatatableProvider>(context,listen: false);
-                                           bool isInsert= await insertCompany.addCompany(companyname.text, displayname.text, uag.text,contactname.text,contactno.text, value.towers, value.floors, value.unitnos, value.occupancys, value.areas,value.staffnos, isSwitchOn4, isSwitchOn2, isSwitchOn3, isSwitchOn);
+                                           bool isInsert= await company.addCompany(
+                                               company.companyName.text,
+                                               company.displayName.text,
+                                               company.uag.text,
+                                               company.contactName.text,
+                                               company.contactNo.text,
+                                               value.towers,
+                                               value.floors,
+                                               value.unitnos,
+                                               value.occupancys,
+                                               value.areas,
+                                               value.staffnos,
+                                               company.isSwitchOn4,
+                                               company.isSwitchOn2,
+                                               company.isSwitchOn3,
+                                               company.isSwitchOn
+                                           );
+
                                            if(isInsert){
                                              Navigator.of(context).pushReplacement(
                                                MaterialPageRoute(
-                                                 builder: (BuildContext context) => const Companyscreen(),
+                                                 builder: (BuildContext context) => const CompanyScreen(),
                                                ),
                                              );
 
-                                             companyname.clear();
-                                             displayname.clear();
-                                             uag.clear();
-                                             contactname.clear();
-                                             contactno.clear();
-                                             isSwitchOn = false;
-                                             isSwitchOn2 = false;
-                                             isSwitchOn3 = false;
-                                             isSwitchOn4 = false;
+                                             company.companyName.clear();
+                                             company.displayName.clear();
+                                             company.uag.clear();
+                                             company.contactName.clear();
+                                             company.contactNo.clear();
+
+                                             company.isSwitchOn = false;
+                                             company.isSwitchOn2 = false;
+                                             company.isSwitchOn3 = false;
+                                             company.isSwitchOn4 = false;
                                            }
 
-                                        }else if(isupdatecompany == true && viewcompany == false && isedited== false){
-                                          print("updated");
-                                          isupdatecompany = false;
-                                          viewcompany= false;
+                                        }else if(company.isUpdateCompany == true && company.viewCompany == false && company.isEdited== false){
+                                          debugPrint("updated");
+                                          company.isUpdateCompany = false;
+                                          company.viewCompany= false;
 
                                           final value= Provider.of<DatatableProvider>(context,listen: false);
-                                          await editeCompanyProvider.updateCompany(companyId1,companyname.text, displayname.text, uag.text,contactname.text, contactno.text, value.towers, value.floors, value.unitnos, value.occupancys, value.areas,value.staffnos, isSwitchOn4, isSwitchOn2, isSwitchOn3, isSwitchOn);
+                                          await company.updateCompany(
+                                              companyPro.companyId1,
+                                              company.companyName.text,
+                                              company.displayName.text,
+                                              company.uag.text,
+                                              company.contactName.text,
+                                              company.contactNo.text,
+                                              value.towers,
+                                              value.floors,
+                                              value.unitnos,
+                                              value.occupancys,
+                                              value.areas,
+                                              value.staffnos,
+                                              company.isSwitchOn4,
+                                              company.isSwitchOn2,
+                                              company.isSwitchOn3,
+                                              company.isSwitchOn
+                                          );
 
                                           Navigator.of(context).pushReplacement(
                                             MaterialPageRoute(
-                                              builder: (BuildContext context) => const Companyscreen(),
+                                              builder: (BuildContext context) => const CompanyScreen(),
                                             ),
                                           );
-                                          companyname.clear();
-                                          displayname.clear();
-                                          uag.clear();
-                                          contactname.clear();
-                                          contactno.clear();
+                                          company.companyName.clear();
+                                          company.displayName.clear();
+                                          company.uag.clear();
+                                          company.contactName.clear();
+                                          company.contactNo.clear();
 
-                                          isSwitchOn = false;
-                                          isSwitchOn2 = false;
-                                          isSwitchOn3 = false;
-                                          isSwitchOn4 = false;
+                                          company.isSwitchOn = false;
+                                          company.isSwitchOn2 = false;
+                                          company.isSwitchOn3 = false;
+                                          company.isSwitchOn4 = false;
                                         }
-                                        else if(isupdatecompany== true && isedited== true && viewcompany == false && isadd == false){
-                                          print("Done");
+                                        else if(company.isUpdateCompany== true && company.isEdited== true && company.viewCompany == false && companyPro.isAdd == false){
+                                          debugPrint("Done");
 
-                                          isupdatecompany = false;
-                                          viewcompany= false;
+                                          company.isUpdateCompany = false;
+                                          company.viewCompany= false;
 
                                           final value= Provider.of<DatatableProvider>(context,listen: false);
-                                          print("towers: ${value.towers}");
-                                          bool succeed= await editeCompanyProvider.updateCompany(companyId1,companyname.text, displayname.text, uag.text,contactname.text, contactno.text, value.towers, value.floors, value.unitnos, value.occupancys, value.areas,value.staffnos, isSwitchOn4, isSwitchOn2, isSwitchOn3, isSwitchOn);
+                                          debugPrint("towers: ${value.towers}");
+
+                                          bool succeed= await company.updateCompany(
+                                              companyPro.companyId1,
+                                              company.companyName.text,
+                                              company.displayName.text,
+                                              company.uag.text,
+                                              company.contactName.text,
+                                              company.contactNo.text,
+                                              value.towers,
+                                              value.floors,
+                                              value.unitnos,
+                                              value.occupancys,
+                                              value.areas,
+                                              value.staffnos,
+                                              company.isSwitchOn4,
+                                              company.isSwitchOn2,
+                                              company.isSwitchOn3,
+                                              company.isSwitchOn
+                                          );
+
                                           if(succeed){
                                             Navigator.of(context).pushReplacement(
                                               MaterialPageRoute(
-                                                builder: (BuildContext context) => const Companyscreen(),
+                                                builder: (BuildContext context) => const CompanyScreen(),
                                               ),
                                             );
-                                            companyname.clear();
-                                            displayname.clear();
-                                            uag.clear();
-                                            contactname.clear();
-                                            contactno.clear();
+                                            company.companyName.clear();
+                                            company.displayName.clear();
+                                            company.uag.clear();
+                                            company.contactName.clear();
+                                            company.contactNo.clear();
 
-                                            isSwitchOn = false;
-                                            isSwitchOn2 = false;
-                                            isSwitchOn3 = false;
-                                            isSwitchOn4 = false;
+                                            company.isSwitchOn = false;
+                                            company.isSwitchOn2 = false;
+                                            company.isSwitchOn3 = false;
+                                            company.isSwitchOn4 = false;
                                           }
 
                                         }

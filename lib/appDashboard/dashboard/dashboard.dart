@@ -1,11 +1,11 @@
 import 'package:acp/appDashboard/dashboard/gridlayout2.dart';
 import 'package:acp/appDrawer/sidemenu.dart';
-import 'package:acp/login.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:math' as math;
+import '../../Provider/Login/Login_Provider.dart';
 import '../../utils/colors.dart';
 import 'Staff_dashboard.dart';
 import 'gridlayout.dart';
@@ -25,34 +25,35 @@ TextEditingController staff1= TextEditingController();
 
 class _DashboardState extends State<Dashboard> {
   late SharedPreferences pref;
-  bool isAdmin = false;
+  bool isAdmin = true;
 
   @override
   void initState() {
     super.initState();
-    _initializePreferences();
+    // _initializePreferences();
   }
 
   // Initialize SharedPreferences asynchronously
-  Future<void> _initializePreferences() async {
-    pref = await SharedPreferences.getInstance();
-    String? userrole= pref.getString('userRole');
-    print("UserRole dashboard : $userrole");
-    if(userrole == "5"){
-      setState(() {
-        isAdmin = true;
-      });
-    }else {
-      setState(() {
-        isAdmin = false;
-      });
-    }
-  }
+  // Future<void> _initializePreferences() async {
+  //   pref = await SharedPreferences.getInstance();
+  //   String? userrole= pref.getString('userRole');
+  //   debugPrint("UserRole dashboard : $userrole");
+  //   if(userrole == "5"){
+  //     setState(() {
+  //       isAdmin = true;
+  //     });
+  //   }else {
+  //     setState(() {
+  //       isAdmin = false;
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
+    final login= context.read<LoginProvider>();
     return PopScope(
-      canPop: false,
+      canPop: true,
       child: LayoutBuilder(
           builder: (BuildContext ctx, BoxConstraints constraints){
             if(constraints.maxHeight>600){
@@ -83,7 +84,7 @@ class _DashboardState extends State<Dashboard> {
                     },
                   ),
                 ),
-                drawer: const Sidemenu(),
+                drawer: const SideMenu(),
                 body: CustomScrollView(
                   slivers: [
                     isAdmin? SliverList(
@@ -372,34 +373,11 @@ class _DashboardState extends State<Dashboard> {
                       );
                     },
                   ),
-                  actions: [
-                    // IconButton(
-                    //   onPressed: () {},
-                    //   icon: const Icon(
-                    //     CupertinoIcons.qrcode,
-                    //     color: Colors.black,
-                    //   ),
-                    // ),
-                    // IconButton(
-                    //   onPressed: () {},
-                    //   icon: const Icon(
-                    //     Icons.notifications,
-                    //     color: Colors.grey,
-                    //   ),
-                    // ),
-                    Container(
-                      // margin: const EdgeInsets.only(top: 5, right: 16, bottom: 5),
-                      // child: const CircleAvatar(
-                      //   backgroundImage: NetworkImage(
-                      //       "https://images.unsplash.com/photo-1500522144261-ea64433bbe27?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NTh8fHdvbWVufGVufDB8MHwwfHw%3D&auto=format&fit=crop&w=500&q=60"),
-                      // ),
-                    )
-                  ],
                 ),
-                drawer: const Sidemenu(),
+                drawer: const SideMenu(),
                 body: CustomScrollView(
                   slivers: [
-                    if(usernameController.text == "admin@gmail.com")
+                    if(login.usernameController.text == "admin@gmail.com")
                       SliverList(
                           delegate: SliverChildListDelegate(
                               [

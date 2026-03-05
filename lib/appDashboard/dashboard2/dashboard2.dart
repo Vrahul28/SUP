@@ -1,17 +1,18 @@
+import 'package:acp/Provider/Login/Login_Provider.dart';
 import 'package:acp/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import '../../login.dart';
+import 'package:provider/provider.dart';
+import '../../login/login.dart';
 import 'grid3.dart';
 
 
 class Dashboard2 extends StatelessWidget {
   const Dashboard2({super.key});
 
-
   @override
   Widget build(BuildContext context) {
+    final login= context.read<LoginProvider>();
     return PopScope(
       canPop: false,
       child: LayoutBuilder(
@@ -44,8 +45,8 @@ class Dashboard2 extends StatelessWidget {
                     builder: (BuildContext context) {
                       return IconButton(
                         onPressed: () {
-                          usernameController.clear();
-                          passwordController.clear();
+                          login.usernameController.clear();
+                          login.passwordController.clear();
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (BuildContext context) => const Login(),

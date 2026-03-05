@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../appDashboard/dashboard2/dashboard2.dart';
 import '../staff/database/dbhelper.dart';
 import '../utils/sizeconfig.dart';
 import 'add_service.dart';
@@ -12,23 +11,23 @@ import 'bookingmethods.dart';
 import 'package:acp/facilitybookingpage/service.dart';
 
 DateTime _selectedDate = DateTime.now();
-TextEditingController selectbooking= TextEditingController();
-TextEditingController eventstartdate= TextEditingController();
-TextEditingController selecteddate= TextEditingController();
+TextEditingController selectBooking= TextEditingController();
+TextEditingController eventStartDate= TextEditingController();
+TextEditingController selectedDate= TextEditingController();
 
-class Facilitybooking extends StatefulWidget {
-  const Facilitybooking({super.key});
+class FacilityBooking extends StatefulWidget {
+  const FacilityBooking({super.key});
 
   @override
-  State<Facilitybooking> createState() => _FacilitybookingState();
+  State<FacilityBooking> createState() => _FacilityBookingState();
 }
 
-class _FacilitybookingState extends State<Facilitybooking> {
-  DBhelper dBhelper= DBhelper.db;
-  late int eventid;
+class _FacilityBookingState extends State<FacilityBooking> {
+  DBHelper dBhelper= DBHelper.db;
+  late int eventId;
 
-  _addDateBar() {
-    selecteddate.text= "${_selectedDate.month}/${_selectedDate.day}/${_selectedDate.year}";
+  addDateBar() {
+    selectedDate.text= "${_selectedDate.month}/${_selectedDate.day}/${_selectedDate.year}";
     return Container(
       margin: const EdgeInsets.only(left: 20, right: 10, top: 10),
       child: DatePicker(
@@ -59,7 +58,7 @@ class _FacilitybookingState extends State<Facilitybooking> {
         onDateChange: (newDate) {
           setState(() {
             _selectedDate = newDate;
-            selecteddate.text= "${_selectedDate.month}/${_selectedDate.day}/${_selectedDate.year}";
+            selectedDate.text= "${_selectedDate.month}/${_selectedDate.day}/${_selectedDate.year}";
           });
         },
 
@@ -67,7 +66,7 @@ class _FacilitybookingState extends State<Facilitybooking> {
     );
   }
 
-  _addTaskBar() {
+  addTaskBar() {
     return Container(
       margin: const EdgeInsets.only(left: 20, right: 10, top: 10),
       child: Row(
@@ -100,10 +99,9 @@ class _FacilitybookingState extends State<Facilitybooking> {
       ),
     );
   }
-
-  _showTasks() {
+  showTasks() {
     return FutureBuilder(
-        future: dBhelper.getAllevnts(),
+        future: dBhelper.getAllEvents(),
         builder: (context, snapshot) {
           if(snapshot.connectionState == ConnectionState.waiting){
             return const Center(
@@ -114,7 +112,7 @@ class _FacilitybookingState extends State<Facilitybooking> {
               child: Text('Error: ${snapshot.error}'),
             );
           }else{
-            final List<Service> eventsOnSelectedDate = allevents.where((event) =>
+            final List<Service> eventsOnSelectedDate = allEvents.where((event) =>
             event.date == DateFormat.yMd().format(_selectedDate)
             ).toList();
             return Column(
@@ -128,9 +126,9 @@ class _FacilitybookingState extends State<Facilitybooking> {
                         scrollDirection: SizeConfig.orientation == Orientation.landscape
                             ? Axis.horizontal
                             : Axis.vertical,
-                        itemCount: allevents.length,
+                        itemCount: allEvents.length,
                           itemBuilder: (context, index) {
-                            var task = allevents[index];
+                            var task = allEvents[index];
                             if (task.payment == 'Daily' ||
                                 task.date == DateFormat.yMd().format(_selectedDate) ||
                                 (task.payment == 'Weekly' &&
@@ -156,7 +154,7 @@ class _FacilitybookingState extends State<Facilitybooking> {
                                 // );
 
                               } catch (e) {
-                                print('Error parsing time: $e');
+                                debugPrint('Error parsing time: $e');
                               }
 
                             }else{
@@ -170,8 +168,8 @@ class _FacilitybookingState extends State<Facilitybooking> {
                                 child: FadeInAnimation(
                                   child: GestureDetector(
                                     onTap: () {
-                                      eventid= task.id!;
-                                      _showBottomSheet(context, task);
+                                      eventId= task.id!;
+                                      showBottomSheet(context, task);
                                     },
                                     child: ServiceTile(task),
                                   ),
@@ -190,7 +188,7 @@ class _FacilitybookingState extends State<Facilitybooking> {
     );
   }
 
-  _showBottomSheet(BuildContext context, Service service) {
+  showBottomSheet(BuildContext context, Service service) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -221,7 +219,7 @@ class _FacilitybookingState extends State<Facilitybooking> {
                 ),
                 service.isCompleted == 1
                     ? Container()
-                    : _buildBottomSheet(
+                    : buildBottomSheet(
                     label: 'Payment',
                     onTap: () {
                       // NotifyHelper().cancelNotification(task);
@@ -230,18 +228,18 @@ class _FacilitybookingState extends State<Facilitybooking> {
                     },
                     clr: Colors.white),
                 const SizedBox(height: 10),
-                _buildBottomSheet(
+                buildBottomSheet(
                     label: 'Delete Task',
                     onTap: () {
-                      var event= Service(id:eventid);
+                      var event= Service(id: eventId);
                       setState(() {
-                        dBhelper.deletetask(event);
+                        dBhelper.deleteTask(event);
                       });
                       Navigator.of(context).pop();
                     },
                     clr: Colors.red[300]!),
                 // Divider(color: Colors.white),
-                _buildBottomSheet(
+                buildBottomSheet(
                     label: 'Cancel',
                     onTap: () {
                       Navigator.of(context).pop();
@@ -258,7 +256,7 @@ class _FacilitybookingState extends State<Facilitybooking> {
     );
   }
 
-  _buildBottomSheet(
+  buildBottomSheet(
       {required String label,
         required Function() onTap,
         required Color clr,
@@ -330,10 +328,7 @@ class _FacilitybookingState extends State<Facilitybooking> {
           builder: (BuildContext context) {
             return IconButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) =>  const Dashboard2()),
-                );
+                Navigator.pop(context);
               },
               icon: const Icon(Icons.arrow_back, color: Colors.black,),
             );
@@ -345,12 +340,12 @@ class _FacilitybookingState extends State<Facilitybooking> {
           SliverList(
               delegate: SliverChildListDelegate(
                   [
-                    _addTaskBar(),
-                    _addDateBar(),
+                    addTaskBar(),
+                    addDateBar(),
                     const SizedBox(
                       height: 20,
                     ),
-                    _showTasks(),
+                    showTasks(),
 
                   ]
               )

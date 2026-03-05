@@ -15,6 +15,16 @@ class VisitorDetailsReportProvider extends ChangeNotifier{
   TextEditingController dateTimeRange= TextEditingController();
   TextEditingController selectType= TextEditingController();
 
+  void clearController(){
+    companyName.clear();
+    selectSource.clear();
+    systemName.clear();
+    visitorName.clear();
+    dateTimeRange.clear();
+    selectType.clear();
+    selectSource.clear();
+  }
+
   Future<bool> getVisitorDetailList(
       String dbSource,
       String companyName,
@@ -45,7 +55,7 @@ class VisitorDetailsReportProvider extends ChangeNotifier{
     request.fields['dateTimeRange'] = dateTimeRange;
     request.fields['report_type[]'] = reportType;
 
-    print("Sending sources: $sources");
+    debugPrint("Sending sources: $sources");
 
 
     try {
@@ -55,19 +65,19 @@ class VisitorDetailsReportProvider extends ChangeNotifier{
       if (response.statusCode == 200) {
         visitorList.clear();
         var jsonResponse = jsonDecode(response.body);
-        print(response.body);
+        debugPrint(response.body);
         for (var item in jsonResponse) {
           visitorList.add(VisitorDetailModel.fromJson(item));
         }
         notifyListeners();
         return true;
       } else {
-        print("Error: ${response.body}");
+        debugPrint("Error: ${response.body}");
         return false;
       }
 
     } catch (e) {
-      print("Exception: $e");
+      debugPrint("Exception: $e");
       return false;
     }
   }

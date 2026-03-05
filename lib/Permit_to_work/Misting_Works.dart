@@ -51,6 +51,7 @@ class _MistingWorksState extends State<MistingWorks> {
       selectedFile = null;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -112,7 +113,6 @@ class _MistingWorksState extends State<MistingWorks> {
               ),
             ),
             const SizedBox(height: 20),
-            //
             Text(
               "Start Date*",
               style: GoogleFonts.poppins(
@@ -138,7 +138,6 @@ class _MistingWorksState extends State<MistingWorks> {
             ),
             const SizedBox(height: 5),
             TimePicker(controller1: widget.controller3,),
-
             const SizedBox(height: 20),
             Text(
               "End Date*",
@@ -266,7 +265,7 @@ class _MistingWorksState extends State<MistingWorks> {
                               setState(() {
                                 _selectedValue = value!;
                                 undertaking= false;
-                                print(_selectedValue);
+                                debugPrint(_selectedValue.toString());
                               });
                             },
                           ),
@@ -301,7 +300,7 @@ class _MistingWorksState extends State<MistingWorks> {
                                     onChanged: (int? value) {
                                       setState(() {
                                         _selectedValue2 = value!;
-                                        print(_selectedValue);
+                                        debugPrint(_selectedValue.toString());
                                       });
                                     },
                                   ),
@@ -315,7 +314,7 @@ class _MistingWorksState extends State<MistingWorks> {
                                     onChanged: (int? value) {
                                       setState(() {
                                         _selectedValue2 = value!;
-                                        print(_selectedValue);
+                                        debugPrint(_selectedValue.toString());
                                       });
                                     },
                                   ),

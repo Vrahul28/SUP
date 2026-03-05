@@ -3,47 +3,49 @@ import 'package:acp/staff/staffscreen.dart';
 import 'package:acp/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:provider/provider.dart';
+import '../Provider/Login/Login_Provider.dart';
 import '../appDashboard/dashboard2/dashboard2.dart';
+import '../appDashboard/main_dashboard/main_dashboard.dart';
 import '../blacklist/blacklist.dart';
-import '../login.dart';
 import 'drawerclass.dart';
 
-class Sidemenu extends StatefulWidget {
-  const Sidemenu({super.key});
+class SideMenu extends StatefulWidget {
+  const SideMenu({super.key});
 
   @override
-  State<Sidemenu> createState() => _SidemenuState();
+  State<SideMenu> createState() => _SideMenuState();
 }
 
-class _SidemenuState extends State<Sidemenu> {
+class _SideMenuState extends State<SideMenu> {
 
   late SharedPreferences pref;
-  bool isAdmin = false;
+  bool isAdmin = true;
 
   @override
   void initState() {
     super.initState();
-    _initializePreferences();
+    // _initializePreferences();
   }
 
   // Initialize SharedPreferences asynchronously
-  Future<void> _initializePreferences() async {
-    pref = await SharedPreferences.getInstance();
-    String? userrole= pref.getString('userRole');
-    if(userrole == "5"){
-      setState(() {
-        isAdmin = true;
-      });
-    }else {
-      setState(() {
-        isAdmin = false;
-      });
-    }
-  }
+  // Future<void> _initializePreferences() async {
+  //   pref = await SharedPreferences.getInstance();
+  //   String? userrole= pref.getString('userRole');
+  //   if(userrole == "5"){
+  //     setState(() {
+  //       isAdmin = true;
+  //     });
+  //   }else {
+  //     setState(() {
+  //       isAdmin = false;
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
+    final login= context.read<LoginProvider>();
     return Drawer(
       child: Material(
         child: isAdmin? Container(
@@ -67,7 +69,7 @@ class _SidemenuState extends State<Sidemenu> {
                   onPressed: () {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
-                        builder: (BuildContext context) => const Companyscreen(),
+                        builder: (BuildContext context) => const CompanyScreen(),
                       ),
                     );
 
@@ -80,13 +82,12 @@ class _SidemenuState extends State<Sidemenu> {
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          builder: (BuildContext context) => const Staffscreen(),
+                          builder: (BuildContext context) => const StaffScreen(),
                         ),
                       );
                     }
                 ),
                 const SizedBox(height: 30,),
-
                 DrawerItem(
                     name: 'Blacklist',
                     icon: Icons.no_accounts,
@@ -105,7 +106,7 @@ class _SidemenuState extends State<Sidemenu> {
                   onPressed: () {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
-                        builder: (BuildContext context) => Dashboard2(),
+                        builder: (BuildContext context) => MainDashboard(),
                       ),
                     );
 
@@ -137,7 +138,7 @@ class _SidemenuState extends State<Sidemenu> {
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          builder: (BuildContext context) => Staffscreen(),
+                          builder: (BuildContext context) => StaffScreen(),
                         ),
                       );
                     }
@@ -147,8 +148,8 @@ class _SidemenuState extends State<Sidemenu> {
                   name: 'Home',
                   icon: Icons.logout,
                   onPressed: () {
-                    usernameController.clear();
-                    passwordController.clear();
+                    login.usernameController.clear();
+                    login.passwordController.clear();
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                         builder: (BuildContext context) => Dashboard2(),
@@ -169,22 +170,6 @@ class _SidemenuState extends State<Sidemenu> {
 }
 
 Widget headerWidget() {
-  // const url = 'https://images.unsplash.com/photo-1500522144261-ea64433bbe27?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NTh8fHdvbWVufGVufDB8MHwwfHw%3D&auto=format&fit=crop&w=500&q=60';
-  // return Row(
-  //   children: [
-  //     const CircleAvatar(
-  //       radius: 40,
-  //       backgroundImage: NetworkImage(url),
-  //     ),
-  //     const SizedBox(width: 20,),
-  //     Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: const [
-  //         Text('Person name', style: TextStyle(fontSize: 14, color: Colors.white)),
-  //       ],
-  //     )
-  //   ],
-  // );
   return Image.asset(
       'assets/images/logo_upload.png',
     width: 250,

@@ -46,13 +46,7 @@ class _VisitorDetailsReportState extends State<VisitorDetailsReport> {
                   ),
                   onPressed: () {
                     Navigator.pop(context);
-                    searchVisitor.companyName.clear();
-                    searchVisitor.selectSource.clear();
-                    searchVisitor.systemName.clear();
-                    searchVisitor.visitorName.clear();
-                    searchVisitor.dateTimeRange.clear();
-                    searchVisitor.selectType.clear();
-                    searchVisitor.selectSource.clear();
+                    searchVisitor.clearController();
                   },
                 ),
               ),

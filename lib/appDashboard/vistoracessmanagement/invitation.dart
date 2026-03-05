@@ -181,7 +181,7 @@ class _InvitationState extends State<Invitation> {
                             onChanged: (text) {
                               // Handle the entered text and split it into multiple emails
                               List<String> emails = text.split(';');
-                              print(email.text);
+                              debugPrint(email.text);
                               // Process the list of emails as needed
                             },
                             decoration: InputDecoration(

@@ -5,14 +5,14 @@ import '../../appDashboard/gridlist.dart';
 
 class VistorAcessProvider extends ChangeNotifier{
 
-  List visitorAccess= adminVistor;
+  List visitorAccess= [];
 
-  void isAdmin(String userRole){
-    // if(userRole == "5"){
-    //   VisitorAcess= adminVistor;
-    // }else if(userRole == "10"){
-    //   VisitorAcess= onlyinvite;
-    // }
+  Future<void> isAdmin(String userRole) async{
+    if(userRole == "5"){
+      visitorAccess= adminVistor;
+    }else if(userRole == "10"){
+      visitorAccess= onlyinvite;
+    }
   }
 
   // void list(TextEditingController controller) async{

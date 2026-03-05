@@ -9,8 +9,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import 'appDashboard/dashboard2/dashboard2.dart';
+import 'appDashboard/main_dashboard/main_dashboard.dart';
 
-TextEditingController otp= TextEditingController();
 
 class OtpPage extends StatefulWidget {
   const OtpPage({super.key});
@@ -21,10 +21,6 @@ class OtpPage extends StatefulWidget {
 
 class _OtpPageState extends State<OtpPage> {
   final  scaffoldMessengerOTPKey = GlobalKey<ScaffoldMessengerState>();
-  String username= "";
-  String userID= "";
-  String status= "";
-
 
   Timer? _timer;
   int _remainingTime = 100; // 600 seconds = 10 minutes
@@ -60,16 +56,10 @@ class _OtpPageState extends State<OtpPage> {
     super.dispose();
   }
 
-  String _formatTime(int seconds) {
-    final minutes = (seconds ~/ 60).toString().padLeft(2, '0');
-    final secs = (seconds % 60).toString().padLeft(2, '0');
-    return "$minutes:$secs";
-  }
-
   @override
   Widget build(BuildContext context) {
     final OTP= Provider.of<OtpProvider>(context,listen: false);
-    final login= Provider.of<LoginProvider>(context, listen: false);
+    final login= context.read<LoginProvider>();
     final resend= Provider.of<ResendotpProvider>(context, listen: false);
     return ScaffoldMessenger(
       key: scaffoldMessengerOTPKey,
@@ -81,7 +71,7 @@ class _OtpPageState extends State<OtpPage> {
                 child: Container(
                   padding: const EdgeInsets.all(20.0),
                   width: (MediaQuery.of(context).size.width*0.75),
-                  height: (MediaQuery.of(context).size.height*0.58),
+                  height: (MediaQuery.of(context).size.height*0.60),
                   decoration: BoxDecoration(
                     color: kDarkblueColor,
                     borderRadius: BorderRadius.circular(21),
@@ -111,7 +101,7 @@ class _OtpPageState extends State<OtpPage> {
                             fontSize: 15.0,
                           ),
                           cursorColor: kDarkblueColor,
-                          controller: otp,
+                          controller: OTP.otp,
                           decoration: InputDecoration(
                               contentPadding: const EdgeInsets.all(18.0),
                               filled: true,
@@ -143,10 +133,10 @@ class _OtpPageState extends State<OtpPage> {
                             TextButton(
                               onPressed: _isResendAvailable
                                   ? () {
-                                userID= login.userid;
-                                username= login.email;
-                                status= login.status;
-                                resend.resendOTP(username, userID, status);
+                                OTP.userID= login.userId!;
+                                OTP.username1= login.email1!;
+                                OTP.status= login.status!;
+                                resend.resendOTP(OTP.username1, OTP.userID, OTP.status);
                                 _startTimer(); // Restart timer
                               }
                                   : null, // Disable button until timer ends
@@ -166,7 +156,7 @@ class _OtpPageState extends State<OtpPage> {
                         ),
                         const SizedBox(height: 20.0),
                         Text(
-                          "OTP is valid for: ${_formatTime(_remainingTime)}",
+                          "OTP is valid for: ${OTP.formatTime(_remainingTime)}",
                           style: GoogleFonts.poppins(
                             fontWeight: FontWeight.w600,
                             fontSize: 15.0,
@@ -191,18 +181,22 @@ class _OtpPageState extends State<OtpPage> {
                               ),
                             ),
                             onPressed: ()  async{
-                              userID= login.userid;
-                              username= login.email;
-                              bool isOTP= await OTP.sendOTP(username,userID, otp.text,context);
+                              OTP.userID= login.userId ?? '';
+                              OTP.username1= login.usernameController.text;
+                              bool isOTP= await OTP.sendOTP(OTP.username1,OTP.userID, OTP.otp.text,context);
+
                               if(isOTP){
                                 login.loginTODashboard(context);
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const Dashboard2()),
+                                  MaterialPageRoute(builder: (context) => const MainDashboard()),
                                 );
-                                otp.clear();
+                                // Navigator.push(
+                                //   context,
+                                //   MaterialPageRoute(builder: (context) => const Dashboard2()),
+                                // );
+                                OTP.otp.clear();
                               }
-
 
                             },
                           ),

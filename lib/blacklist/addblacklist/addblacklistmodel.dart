@@ -1,18 +1,18 @@
-class Addbacklistmodel {
+class AddBackListModel {
   int? visitorBlackListId;
   String? documentNumber;
   String? visitorName;
   String? blackListDate;
 
 
-  Addbacklistmodel(
+  AddBackListModel(
       {this.visitorBlackListId,
         this.documentNumber,
         this.visitorName,
         this.blackListDate,
         });
 
-  Addbacklistmodel.fromJson(Map<String, dynamic> json) {
+  AddBackListModel.fromJson(Map<String, dynamic> json) {
     visitorBlackListId = json['visitorBlackListId'];
     documentNumber = json['documentNumber'];
     visitorName = json['visitorName'];

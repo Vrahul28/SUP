@@ -4,15 +4,23 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'CreatePassword_API.dart';
 
-TextEditingController username= TextEditingController();
-TextEditingController password= TextEditingController();
-TextEditingController confirmpassword= TextEditingController();
 final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
-
-class CreatePassword extends StatelessWidget {
+class CreatePassword extends StatefulWidget {
   const CreatePassword({super.key});
 
+  @override
+  State<CreatePassword> createState() => _CreatePasswordState();
+}
+
+class _CreatePasswordState extends State<CreatePassword> {
+  @override
+  void dispose() {
+    username.dispose();
+    password.dispose();
+    confirmPassword.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
@@ -54,7 +62,7 @@ class CreatePassword extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   CustomTextfield(
-                    controller: confirmpassword,
+                    controller: confirmPassword,
                     hinttext: 'Confirm Password',
                     Icons:  Icons.password,
                     errorMsg: '',
@@ -69,13 +77,9 @@ class CreatePassword extends StatelessWidget {
                       onPressed: () async{
                         bool isSuccess= await createNewPassword(username.text, password.text);
                         if(isSuccess){
-                          username.clear();
-                          password.clear();
-                          confirmpassword.clear();
+                          clearController();
                           Navigator.pop(context);
                         }
-
-
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: kDarkblueColor,

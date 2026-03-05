@@ -1,53 +1,49 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:acp/company/companymodel.dart';
+import 'package:acp/urls/urls.dart';
 import 'package:acp/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-
-import '../staff/addstaff/addstaff.dart';
+import 'package:provider/provider.dart';
+import '../Provider/Company/Company_Provider.dart';
+import '../Provider/Staff/Insert_Staff_Provider.dart';
+import '../Provider/Staff/Staff_Provider.dart';
+import '../appDashboard/vistoracessmanagement/invitation.dart';
 import '../staff/addstaff/addstaffmethods.dart';
 import '../staff/staffscreen.dart';
 
-import 'companyscreen.dart';
 
-List<Company> allcompanydata= [];
-Future<void> getCompany(String? query,String? query2, String? query3) async{
+List<Company> allCompanyData= [];
+Future<void> getCompany(String? query,String? query2, String? query3, BuildContext context) async{
+  final companyPro= context.read<CompanyProvider>();
 
   // String url= "https://access.apm.sg/restApplicationUser/restCompany/company/list";
-  String url= "http://111.223.92.154:8091/acp_api/companyManagement.php";
-  String completeurl= url;
+  String url= Urls.getCompanyAPI;
+  String completeUrl= url;
 
   HttpOverrides.global = MyHttpOverrides();
 
   var response = await http.get(
-    Uri.parse(completeurl),
+    Uri.parse(completeUrl),
     headers: <String, String>{
       'Content-Type': 'application/x-www-form-urlencoded'
     },
   );
 
   if(response.statusCode==200){
-    allcompanydata.clear();
-    var jsonresponse= jsonDecode(response.body);
-    for(var item in jsonresponse){
+    allCompanyData.clear();
+    var jsonResponse= jsonDecode(response.body);
+    for(var item in jsonResponse){
       final company= Company.fromJson(item);
-      allcompanydata.add(company);
+      allCompanyData.add(company);
     }
 
-    // if(towercodeclass.text.isNotEmpty){
-    //   if(query!= null){
-    //     allcompanydata= allcompanydata.where((element) => element.towerString!.toLowerCase()
-    //         .contains(query.toLowerCase())).toSet().toList();
-    //     print(allcompanydata.length);
-    //   }
-    // }
-
-    if (towercodeclass.text.isNotEmpty && query != null) {
+    if (companyPro.towerCodeClass.text.isNotEmpty && query != null) {
       Set<Company> uniqueCompanies = Set<Company>();
-      for (var item in jsonresponse) {
+      for (var item in jsonResponse) {
         final company = Company.fromJson(item);
 
         if (company.towerId!.toLowerCase().contains(query.toLowerCase())) {
@@ -55,10 +51,10 @@ Future<void> getCompany(String? query,String? query2, String? query3) async{
         }
       }
 
-      allcompanydata.clear();
-      allcompanydata.addAll(uniqueCompanies.toList());
+      allCompanyData.clear();
+      allCompanyData.addAll(uniqueCompanies.toList());
 
-      print(allcompanydata.length);
+      debugPrint(allCompanyData.length.toString());
     }
 
     // if (companycodeclass.text.isNotEmpty && query2!=null) {
@@ -78,27 +74,24 @@ Future<void> getCompany(String? query,String? query2, String? query3) async{
     //   print(allcompanydata.length);
     // }
 
-    if(companycodeclass.text.isNotEmpty){
+    if(companyPro.companyCodeClass.text.isNotEmpty){
       if(query2!=null){
-        allcompanydata= allcompanydata.where((element) => element.companyName!.toLowerCase()
+        allCompanyData= allCompanyData.where((element) => element.companyName!.toLowerCase()
             .contains(query2.toLowerCase())).toList();
-
       }
     }
 
-    if(unitnoclass.text.isNotEmpty){
+    if(companyPro.unitNoClass.text.isNotEmpty){
       if(query3!=null){
-        allcompanydata= allcompanydata.where((element) => element.unitNo!.toLowerCase()
+        allCompanyData= allCompanyData.where((element) => element.unitNo!.toLowerCase()
             .contains(query3.toLowerCase())).toList();
-
       }
     }
 
-    var count= allcompanydata
-        .where((element) => element.towerId != null && element.towerId!.length > 0)
-        .length;
-    allresult.text= count.toString();
-    print(count);
+    var count= allCompanyData.where((element) => element.towerId != null && element.towerId!.length > 0).length;
+
+    companyPro.allResult.text= count.toString();
+    debugPrint(count.toString());
   }
 }
 
@@ -113,22 +106,22 @@ class MyHttpOverrides extends HttpOverrides{
 
 
 
-List<Company> alltowerdata= [];
+List<Company> allTowerData= [];
 
 Future<void> getTower(String? query) async{
-  alltowerdata.clear();
+  allTowerData.clear();
   // String tower= towercodeclass.text;
   String? tower= query;
 
   String urlparameter= 'tower='+ Uri.encodeComponent('$tower');
   String url= "https://access.apm.sg/restApplicationUser/restCompany/company/getCompanyDetailsByTowers";
-  String completeurl= '$url?$urlparameter';
-  print(completeurl);
+  String completeUrl= '$url?$urlparameter';
+  debugPrint(completeUrl);
 
   HttpOverrides.global = MyHttpOverrides();
 
   var response = await http.post(
-    Uri.parse(completeurl),
+    Uri.parse(completeUrl),
     body: urlparameter,
     encoding: Encoding.getByName('utf-8'),
     headers: <String, String>{
@@ -137,11 +130,11 @@ Future<void> getTower(String? query) async{
   );
 
   if(response.statusCode==200){
-    var jsonresponse= jsonDecode(response.body);
-    print(jsonresponse);
-    for(var item in jsonresponse){
+    var jsonResponse= jsonDecode(response.body);
+    debugPrint(jsonResponse);
+    for(var item in jsonResponse){
       final tower= Company.fromJson(item);
-      alltowerdata.add(tower);
+      allTowerData.add(tower);
     }
 
     // if (query != null) {
@@ -170,23 +163,24 @@ Future<void> getTower(String? query) async{
 
 List<Company> allcompanydata1= [];
 
-Future<void> getCompany1(String? query,String? query2) async{
+Future<void> getCompany1(String? query,String? query2, BuildContext context) async{
+  final companyPro= context.read<CompanyProvider>();
   allcompanydata1.clear();
   String url= "https://access.apm.sg/restApplicationUser/restCompany/company/list";
-  String completeurl= url;
+  String completeUrl= url;
 
   HttpOverrides.global = MyHttpOverrides();
 
   var response = await http.get(
-    Uri.parse(completeurl),
+    Uri.parse(completeUrl),
     headers: <String, String>{
       'Content-Type': 'application/x-www-form-urlencoded'
     },
   );
 
   if(response.statusCode==200){
-    var jsonresponse= jsonDecode(response.body);
-    for(var item in jsonresponse){
+    var jsonResponse= jsonDecode(response.body);
+    for(var item in jsonResponse){
       final company= Company.fromJson(item);
       allcompanydata1.add(company);
     }
@@ -195,7 +189,7 @@ Future<void> getCompany1(String? query,String? query2) async{
       allcompanydata1.clear();
       Set<Company> uniqueCompanies = Set<Company>();
 
-      for (var item in jsonresponse) {
+      for (var item in jsonResponse) {
         final company = Company.fromJson(item);
 
         if (company.companyName!.toLowerCase().contains(query.toLowerCase())) {
@@ -211,7 +205,7 @@ Future<void> getCompany1(String? query,String? query2) async{
         .where((element) => element.companyName != null && element.companyName!.length > 0)
         .length;
 
-    totalcompany.text=count.toString();
+    companyPro.totalCompany.text=count.toString();
   }
 
 }
@@ -233,6 +227,8 @@ class Tower extends StatefulWidget {
 class _TowerState extends State<Tower> {
   @override
   Widget build(BuildContext context) {
+    final companyPro= context.read<CompanyProvider>();
+    final staffProvider= context.read<InsertStaffProvider>();
     return Padding(
       padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0),
       child: TypeAheadField<Company?>(
@@ -246,6 +242,7 @@ class _TowerState extends State<Tower> {
                 }
                 return null;
               },
+              focusNode: focusNode,
               style: GoogleFonts.poppins(
                 color: kDarkblueColor,
                 fontWeight: FontWeight.w600,
@@ -268,7 +265,6 @@ class _TowerState extends State<Tower> {
                   borderRadius: BorderRadius.circular(10.0),
                   borderSide: BorderSide(color: kDarkblueColor),
                 ),
-
                 hintText: "Tower",
                 hintStyle: GoogleFonts.poppins(
                   color: kDarkblueColor,
@@ -311,8 +307,8 @@ class _TowerState extends State<Tower> {
           ),
           onSelected: (Company? suggestion){
             if (suggestion != null) {
-              towercodeclass.text = suggestion.towerId?? '';
-              location.text= suggestion.towerId?? '';
+              companyPro.towerCodeClass.text = suggestion.towerId?? '';
+              staffProvider.location.text= suggestion.towerId?? '';
               towerId.add(int.parse(suggestion.towerId!));
               getCompanyList(suggestion.towerId!);
             }
@@ -325,49 +321,49 @@ class _TowerState extends State<Tower> {
 
 
 // Company
-List<Company> CompanyData= [];
+List<Company> companyData= [];
 
 Future<void> getCompanyList(String towerNo) async{
-  CompanyData.clear();
+  companyData.clear();
   String url= "http://111.223.92.154:8091/acp_api/companyManagement.php?tower_id=$towerNo";
-  String completeurl= url;
+  String completeUrl= url;
 
   HttpOverrides.global = MyHttpOverrides();
 
   var response = await http.get(
-    Uri.parse(completeurl),
+    Uri.parse(completeUrl),
     headers: <String, String>{
       'Content-Type': 'application/x-www-form-urlencoded'
     },
   );
 
   if(response.statusCode==200){
-    var jsonresponse= jsonDecode(response.body);
-    for(var item in jsonresponse){
+    var jsonResponse= jsonDecode(response.body);
+    for(var item in jsonResponse){
       final company= Company.fromJson(item);
-      CompanyData.add(company);
+      companyData.add(company);
     }
   }
 
 }
 
-class Allcompany extends StatefulWidget {
+class AllCompany extends StatefulWidget {
   final TextEditingController controller1;
   final String hint;
-  const Allcompany(
-      {Key? key,
+  const AllCompany(
+      {super.key,
         required this.controller1,
         required this.hint,
-      })
-      : super(key: key);
+      });
 
   @override
-  State<Allcompany> createState() => _AllcompanyState();
+  State<AllCompany> createState() => _AllCompanyState();
 }
 
-class _AllcompanyState extends State<Allcompany> {
+class _AllCompanyState extends State<AllCompany> {
   @override
   Widget build(BuildContext context) {
+    final staffProvider= context.read<InsertStaffProvider>();
     return Padding(
       padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0),
       child: TypeAheadField<Company?>(
@@ -381,6 +377,7 @@ class _AllcompanyState extends State<Allcompany> {
                 }
                 return null;
               },
+              focusNode: focusNode,
               style: GoogleFonts.poppins(
                 color: kDarkblueColor,
                 fontWeight: FontWeight.w600,
@@ -410,14 +407,13 @@ class _AllcompanyState extends State<Allcompany> {
                   fontWeight: FontWeight.w600,
                   fontSize: 15.0,
                 ),
-
               ),
             );
           },
           suggestionsCallback: (pattern) async {
-              if (location.text.isNotEmpty) {
-                print("Tower: $tower");
-                List<Company> filteredCompanies = CompanyData
+              if (staffProvider.location.text.isNotEmpty) {
+                debugPrint("Tower: $tower");
+                List<Company> filteredCompanies = companyData
                     .where((company) =>
                     company.companyName!.toLowerCase().contains(pattern.toLowerCase()))
                     .toList();
@@ -453,12 +449,12 @@ class _AllcompanyState extends State<Allcompany> {
           onSelected: (Company? suggestion){
             if (suggestion != null) {
               widget.controller1.text = suggestion.companyName?? '';
-              unitno.text= suggestion.unitNos?? '';
-              company_id= suggestion.companyId!;
+              staffProvider.unitNo.text= suggestion.unitNos?? '';
+              staffProvider.companyId= suggestion.companyId!;
             }
             // contractidController.text= suggestion?.contract_type_id ?? '';
             // contract_id= contractidController.text;
-            // print("contract_id= $contract_id");
+            // debugPrint("contract_id= $contract_id");
           },
         ),
 
@@ -472,17 +468,17 @@ class _AllcompanyState extends State<Allcompany> {
 // Company for company screen
 
 // Company
-List<Company> allCompanyData= [];
+List<Company> allCompanyData1= [];
 
 Future<void> getAllCompany() async{
   allCompanyData.clear();
   String url= "http://111.223.92.154:8091/acp_api/companyManagement.php";
-  String completeurl= url;
+  String completeUrl= url;
 
   HttpOverrides.global = MyHttpOverrides();
 
   var response = await http.get(
-    Uri.parse(completeurl),
+    Uri.parse(completeUrl),
     headers: <String, String>{
       'Content-Type': 'application/x-www-form-urlencoded'
     },
@@ -501,10 +497,10 @@ Future<void> getAllCompany() async{
 late String TextCompanyId;
 List<int> companyID= [];
 
-class Allcompany1 extends StatefulWidget {
+class AllCompany1 extends StatefulWidget {
   final TextEditingController controller1;
   final String hint;
-  const Allcompany1(
+  const AllCompany1(
       {Key? key,
         required this.controller1,
         required this.hint,
@@ -512,12 +508,15 @@ class Allcompany1 extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<Allcompany1> createState() => _Allcompany1State();
+  State<AllCompany1> createState() => _AllCompany1State();
 }
 
-class _Allcompany1State extends State<Allcompany1> {
+class _AllCompany1State extends State<AllCompany1> {
   @override
   Widget build(BuildContext context) {
+    final companyPro= context.read<CompanyProvider>();
+    final staffProvider= context.read<InsertStaffProvider>();
+    final staff= context.read<StaffProvider>();
     getAllCompany();
     return Padding(
       padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0),
@@ -532,6 +531,7 @@ class _Allcompany1State extends State<Allcompany1> {
                 }
                 return null;
               },
+              focusNode: focusNode,
               style: GoogleFonts.poppins(
                 color: kDarkblueColor,
                 fontWeight: FontWeight.w600,
@@ -597,10 +597,10 @@ class _Allcompany1State extends State<Allcompany1> {
             widget.controller1.text = suggestion.companyName?? '';
             TextCompanyId= suggestion.companyId!;
             companyID.add(int.parse(suggestion.companyId!));
-            isSearch= true;
-            isSearchStaff= true;
-            unitno.text= suggestion.unitNos?? '';
-            company_id= suggestion.companyId!.toString();
+            companyPro.isSearch= true;
+            staff.isSearchStaff= true;
+            staffProvider.unitNo.text= suggestion.unitNos?? '';
+            staffProvider.companyId= suggestion.companyId!.toString();
           }
         },
       ),

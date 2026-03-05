@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../Provider/Company/DataTable_Provider.dart';
-import 'addcompany/addcompany.dart';
+import '../Provider/Company/Insert_Company_Provider.dart';
+
 
 class DatatableInsert extends StatefulWidget {
   final int length;
@@ -28,7 +29,9 @@ class DatatableInsert extends StatefulWidget {
 }
 
 class _DatatableInsertState extends State<DatatableInsert> {
+  @override
   Widget build(BuildContext context) {
+    final company= context.read<InsertCompanyProvider>();
     return Consumer<DatatableProvider>(
       builder: (context, provider, child) {
         return Padding(
@@ -88,15 +91,15 @@ class _DatatableInsertState extends State<DatatableInsert> {
                                           ],
                                         ),
                                         onTap: () {
-                                          isedited= true;
-                                          id1= index;
+                                          company.isEdited= true;
+                                          company.id1= index;
 
-                                          towercompany.text= widget.towers[index];
-                                          floor.text= widget.floors[index];
-                                          unitno.text= widget.unitNos[index];
-                                          area.text= widget.areas[index];
-                                          occupancy.text= widget.occupancies[index];
-                                          staffno.text= widget.staffNos[index];
+                                          company.towerCompany.text= widget.towers[index];
+                                          company.floor.text= widget.floors[index];
+                                          company.unitNo.text= widget.unitNos[index];
+                                          company.area.text= widget.areas[index];
+                                          company.occupancy.text= widget.occupancies[index];
+                                          company.staffNo.text= widget.staffNos[index];
                                           Navigator.pop(context);
                                         },
                                       ),

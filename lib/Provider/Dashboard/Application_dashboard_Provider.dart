@@ -5,14 +5,14 @@ import '../../appDashboard/gridlist.dart';
 
 class ApplicationDashboardProvider extends ChangeNotifier{
 
-  List lists= admin_1;
+  List lists= [];
 
-  void isAdmin(String userRole){
-    // if(userRole == "5"){
-    //   lists= admin_1;
-    // }else if(userRole == "10"){
-    //   lists= staff_1;
-    // }
+  Future<void> isAdmin(String userRole) async{
+    if(userRole == "1"){
+      lists= admin_1;
+    }else if(userRole == "10"){
+      lists= staff_1;
+    }
   }
 
 
@@ -20,7 +20,7 @@ class ApplicationDashboardProvider extends ChangeNotifier{
   //   lists= admin_1;
   //   final newuser= await SharedPreferences.getInstance();
   //   String? user= newuser.getString("email");
-  //   print(user);
+  //   debubPrint(user);
   //   if(controller.text == user){
   //     lists= staff_1;
   //     notifyListeners();

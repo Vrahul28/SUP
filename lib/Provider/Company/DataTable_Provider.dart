@@ -49,7 +49,7 @@ class DatatableProvider extends ChangeNotifier{
 
       notifyListeners(); // Notifies consumers to rebuild
     } else {
-      print("Invalid index: $index");
+      debugPrint("Invalid index: $index");
     }
   }
 
@@ -65,7 +65,7 @@ class DatatableProvider extends ChangeNotifier{
 
       notifyListeners(); // Notifies consumers to rebuild
     } else {
-      print("Invalid index: $index");
+      debugPrint("Invalid index: $index");
     }
   }
 

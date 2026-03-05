@@ -1,4 +1,5 @@
-import 'package:acp/login.dart';
+import 'package:acp/appDashboard/main_dashboard/main_dashboard.dart';
+import 'package:acp/login/login.dart';
 import 'package:acp/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -51,11 +52,8 @@ class _VistoracessState extends State<Vistoracess> {
                   builder: (BuildContext context) {
                     return IconButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const Dashboard2()),
-                        );
-                      },
+                        Navigator.pop(context);
+                        },
                       icon: Icon(Icons.arrow_back, color: kDarkblueColor,),
                     );
                   },

@@ -173,7 +173,7 @@ class SiteWorkerProvider extends ChangeNotifier{
                     activeColor: kDarkblueColor,
                     onChanged: (value) {
                       selectedRoleValues[index] = value!;
-                      print(value);
+                      debugPrint(value.toString());
                       notifyListeners();
                     },
                   ),
@@ -219,10 +219,10 @@ class SiteWorkerProvider extends ChangeNotifier{
               ),
               initialCountryCode: 'IN', // Default to India
               onChanged: (phone) {
-                print(phone.completeNumber); // Output complete number with country code
+                debugPrint(phone.completeNumber); // Output complete number with country code
               },
               onCountryChanged: (country) {
-                print('Country changed to: ' + country.name);
+                debugPrint('Country changed to: ' + country.name);
               },
               dropdownTextStyle: GoogleFonts.poppins(
                   color: kDarkblueColor,

@@ -1,5 +1,3 @@
-
-import 'package:acp/Provider/Blacklist/Edit_Blacklist_Provider.dart';
 import 'package:acp/Provider/Blacklist/Insert_Blacklist_Provider.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -9,34 +7,28 @@ import '../../utils/Textform_field.dart';
 import '../../utils/colors.dart';
 import '../blacklist.dart';
 
-class Addblacklist extends StatefulWidget {
-  const Addblacklist({super.key});
+class AddBlacklist extends StatefulWidget {
+  const AddBlacklist({super.key});
 
   @override
-  State<Addblacklist> createState() => _AddblacklistState();
+  State<AddBlacklist> createState() => _AddBlacklistState();
 }
-TextEditingController vistor= TextEditingController();
-TextEditingController document= TextEditingController();
-bool isupdateblacklist= false;
-bool viewblacklist= false;
-late String blackListid;
 
-class _AddblacklistState extends State<Addblacklist> {
+
+class _AddBlacklistState extends State<AddBlacklist> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isSwitchOn = false;
   bool isSwitchOn2 = false;
   bool isSwitchOn3 = false;
-  // DBhelper dBhelper1= DBhelper.db;
 
   DateTime d = DateTime.now();
   @override
   Widget build(BuildContext context) {
-    final insertBlacklist= Provider.of<InsertBlacklistProvider>(context, listen: false);
-    final updateBlacklist= Provider.of<EditBlacklistProvider>(context, listen: false);
+    final insertBlacklist= context.read<InsertBlacklistProvider>();
     return Material(
       child: Scaffold(
         body: Form(
-          key: this._formKey,
+          key: _formKey,
           child: CustomScrollView(
             slivers: <Widget>[
                 SliverAppBar(
@@ -55,9 +47,7 @@ class _AddblacklistState extends State<Addblacklist> {
                       color: Colors.white,
                     ),
                     onPressed: () {
-                      viewblacklist=false;
-                      vistor.clear();
-                      document.clear();
+                      insertBlacklist.viewBlacklist = false;
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                           builder: (BuildContext context) => Blacklist(),
@@ -82,9 +72,9 @@ class _AddblacklistState extends State<Addblacklist> {
                                 Icons: Icons.person,
                                 obsuretext: false,
                                 lines: 1,
-                                errorMsg: 'Vistor Name Required',
-                                hinttext: 'Vistor Name',
-                                controller: vistor,
+                                errorMsg: 'Visitor Name Required',
+                                hinttext: 'Visitor Name',
+                                controller: insertBlacklist.visitor,
                               )
                             ),
                             Padding(
@@ -95,13 +85,13 @@ class _AddblacklistState extends State<Addblacklist> {
                                 lines: 1,
                                 errorMsg: 'Document number Required',
                                 hinttext: 'Document Number',
-                                controller: document,
+                                controller: insertBlacklist.document,
                               )
                             ),
                             const SizedBox(
                               height: 10,
                             ),
-                            if(viewblacklist == false)
+                            if(insertBlacklist.viewBlacklist == false)
                               Padding(
                                 padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
                                 child: SizedBox(
@@ -111,8 +101,8 @@ class _AddblacklistState extends State<Addblacklist> {
                                     onPressed: () async {
                                       if(_formKey.currentState!.validate()){
 
-                                        if(isupdateblacklist == false && viewblacklist == false){
-                                          bool isSuccess= await insertBlacklist.addBlacklist(vistor.text, document.text);
+                                        if(insertBlacklist.isUpdateBlacklist == false && insertBlacklist.viewBlacklist == false){
+                                          bool isSuccess= await insertBlacklist.addBlacklist(insertBlacklist.visitor.text, insertBlacklist.document.text);
                                           if(isSuccess){
                                             Fluttertoast.showToast(msg: "Data Inserted successfully", textColor: kDarkblueColor,fontSize: 12.0,backgroundColor: Colors.white);
                                             Navigator.of(context).pushReplacement(
@@ -120,14 +110,13 @@ class _AddblacklistState extends State<Addblacklist> {
                                                 builder: (BuildContext context) => Blacklist(),
                                               ),
                                             );
-                                            vistor.clear();
-                                            document.clear();
+                                            insertBlacklist.clearController();
                                           }
 
-                                        } else if(isupdateblacklist == true){
-                                          isupdateblacklist = false;
-                                          print("updated");
-                                          await updateBlacklist.updateBlacklist(blackListid, vistor.text, document.text);
+                                        } else if(insertBlacklist.isUpdateBlacklist == true){
+                                          insertBlacklist.isUpdateBlacklist = false;
+                                          debugPrint("updated");
+                                          await insertBlacklist.updateBlacklist(insertBlacklist.blackListId, insertBlacklist.visitor.text, insertBlacklist.document.text);
                                           Fluttertoast.showToast(msg: "Data updated successfully", textColor: kDarkblueColor, fontSize: 12.0,backgroundColor: Colors.white);
 
                                           Navigator.of(context).pushReplacement(
@@ -135,8 +124,7 @@ class _AddblacklistState extends State<Addblacklist> {
                                               builder: (BuildContext context) => Blacklist(),
                                             ),
                                           );
-                                          vistor.clear();
-                                          document.clear();
+                                          insertBlacklist.clearController();
                                         }
 
                                       }

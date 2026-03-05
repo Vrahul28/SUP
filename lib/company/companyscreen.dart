@@ -1,8 +1,5 @@
 import 'package:acp/Provider/Company/Company_Provider.dart';
-import 'package:acp/Provider/Company/Delete_Company_Provider.dart';
-import 'package:acp/Provider/Company/Edit_Company_Provider.dart';
-import 'package:acp/Provider/Company/View_Company_Provider.dart';
-import 'package:acp/staff/database/dbhelper.dart';
+import 'package:acp/Provider/Company/Insert_Company_Provider.dart';
 import 'package:acp/utils/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,46 +7,28 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import '../Provider/Company/DataTable_Provider.dart';
-import '../Provider/Company/Search_Company_Provider.dart';
 import '../appDashboard/dashboard/dashboard.dart';
 import 'addcompany/addcompany.dart';
 import 'companymethods.dart';
 
 
-class Companyscreen extends StatefulWidget {
-  const Companyscreen({super.key});
+class CompanyScreen extends StatefulWidget {
+  const CompanyScreen({super.key});
 
   @override
-  State<Companyscreen> createState() => _CompanyscreenState();
+  State<CompanyScreen> createState() => _CompanyScreenState();
 }
 
-TextEditingController companycodeclass = TextEditingController();
-TextEditingController towercodeclass = TextEditingController();
-TextEditingController unitnoclass = TextEditingController();
-TextEditingController totalcompany= TextEditingController();
-TextEditingController allresult= TextEditingController();
-
-bool isadd= false;
-bool addingcompany= false;
-late String companylistid;
-late int viewid;
-
-String companyId1= "";
-bool isSearch= false;
-class _CompanyscreenState extends State<Companyscreen> {
+class _CompanyScreenState extends State<CompanyScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ScrollController _scrollController = ScrollController();
   @override
   Widget build(BuildContext context) {
     final companyProvider= Provider.of<CompanyProvider>(context,listen: false);
-    final viewCompanyProvider= Provider.of<ViewCompanyProvider>(context, listen: false);
-    final deleteCompanyProvider= Provider.of<DeleteCompanyProvider>(context);
-    final searchCompany= Provider.of<SearchCompanyProvider>(context);
-    print("Company");
     return Material(
       child: Scaffold(
         body: Form(
-          key: this._formKey,
+          key: _formKey,
           child: CustomScrollView(
               slivers:<Widget>[
                 SliverAppBar(
@@ -64,26 +43,26 @@ class _CompanyscreenState extends State<Companyscreen> {
                   ),
                   ),
                   centerTitle: true,
-
                   leading: IconButton(
                     icon: const Icon(
                       Icons.arrow_back,
                       color: Colors.white,
                     ),
                     onPressed: () {
-                      companycodeclass.clear();
-                      towercodeclass.clear();
-                      unitnoclass.clear();
-                      allcompanydata.clear();
-                      isSearch= false;
+                      companyProvider.companyCodeClass.clear();
+                      companyProvider.towerCodeClass.clear();
+                      companyProvider.unitNoClass.clear();
+                      allCompanyData.clear();
+
+                      companyProvider.isSearch= false;
                       companyID.clear();
                       towerId.clear();
+
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                           builder: (BuildContext context) => const Dashboard(),
                         ),
                       );
-
                     },
                   ),
                   actions: [
@@ -95,14 +74,13 @@ class _CompanyscreenState extends State<Companyscreen> {
                       onPressed: () {
                         Navigator.of(context).pushReplacement(
                           MaterialPageRoute(
-                            builder: (BuildContext context) => const Addcompany(),
+                            builder: (BuildContext context) => const AddCompany(),
                           ),
                         );
                       },
                     ),
                   ],
                 ),
-
                 SliverList(
                   delegate: SliverChildListDelegate(
                       [
@@ -110,12 +88,12 @@ class _CompanyscreenState extends State<Companyscreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 20),
-                              Tower(controller1: towercodeclass),
-                              Allcompany1(controller1: companycodeclass, hint: "Company",),
+                              Tower(controller1: companyProvider.towerCodeClass),
+                              AllCompany1(controller1: companyProvider.companyCodeClass, hint: "Company",),
                               Padding(
                                 padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0),
                                 child: TextFormField(
-                                  controller: unitnoclass,
+                                  controller: companyProvider.unitNoClass,
                                   cursorColor: kDarkblueColor,
                                   style: GoogleFonts.poppins(
                                     color: kDarkblueColor,
@@ -123,7 +101,7 @@ class _CompanyscreenState extends State<Companyscreen> {
                                     fontSize: 15.0,
                                   ),
                                   onChanged: (value) {
-                                    isSearch= true;
+                                    companyProvider.isSearch= true;
                                   },
                                   decoration: InputDecoration(
                                     contentPadding: const EdgeInsets.all(18.0),
@@ -159,7 +137,9 @@ class _CompanyscreenState extends State<Companyscreen> {
                                     width: (MediaQuery.of(context).size.width),
                                     height: (MediaQuery.of(context).size.height),
                                     child: FutureBuilder(
-                                            future: isSearch? searchCompany.searchCompany(companyID, towerId, unitnoclass.text):companyProvider.getCompany(towercodeclass.text,companycodeclass.text, unitnoclass.text),
+                                            future: companyProvider.isSearch?
+                                            companyProvider.searchCompany(companyID, towerId, companyProvider.unitNoClass.text):
+                                            companyProvider.getCompany(companyProvider.towerCodeClass.text,companyProvider.companyCodeClass.text, companyProvider.unitNoClass.text),
                                             builder: (context, snapshot) {
                                               if(snapshot.connectionState == ConnectionState.waiting){
                                                 return const Center(
@@ -180,7 +160,7 @@ class _CompanyscreenState extends State<Companyscreen> {
                                                           child: Consumer<CompanyProvider>(
                                                             builder: (BuildContext context, CompanyProvider value, Widget? child) {
                                                               return Text(
-                                                                "Total Company : ${isSearch?searchCompany.companycount: value.count}",
+                                                                "Total Company : ${companyProvider.isSearch?companyProvider.companyCount: value.count}",
                                                                 style: GoogleFonts.poppins(
                                                                   color: kDarkblueColor,
                                                                   fontSize: 18.0,
@@ -200,9 +180,9 @@ class _CompanyscreenState extends State<Companyscreen> {
                                                           return ListView.builder(
                                                             padding: EdgeInsets.zero,
                                                             controller: _scrollController,
-                                                            itemCount: isSearch? searchCompany.searchList.length:value.allCompanydate.length,
+                                                            itemCount: companyProvider.isSearch? companyProvider.searchList.length:value.allCompanyDate.length,
                                                             itemBuilder:(context, index) {
-                                                              final company= isSearch?searchCompany.searchList[index]: value.allCompanydate[index];
+                                                              final company= companyProvider.isSearch?companyProvider.searchList[index]: value.allCompanyDate[index];
                                                               return Card(
                                                                 color: kGinColor2,
                                                                 child:  Padding(
@@ -324,158 +304,163 @@ class _CompanyscreenState extends State<Companyscreen> {
                                                                           ],
                                                                         ),
                                                                       ),
-                                                                      Positioned(
-                                                                          top: 1.0,
-                                                                          right: 4.0,
-                                                                          child: SizedBox(
-                                                                            child: PopupMenuButton(
-                                                                              icon: Icon(Icons.more_horiz),
-                                                                              itemBuilder: (context) {
-                                                                                return [
-                                                                                  PopupMenuItem(
-                                                                                    value: 'view',
-                                                                                    child: InkWell(
-                                                                                      child: Row(
-                                                                                        children: [
-                                                                                          Icon(Icons.remove_red_eye, size: 20,color: kDarkblueColor,),
-                                                                                          const SizedBox(
-                                                                                            width: 10,
-                                                                                          ),
-                                                                                          Text('View', style: GoogleFonts.poppins(
-                                                                                            color: Colors.black,
-                                                                                            fontWeight: FontWeight.w500,
-                                                                                            fontSize: 17.0,
-                                                                                          )),
-                                                                                        ],
-                                                                                      ),
-                                                                                      onTap: () async{
-                                                                                        companyId1= company.companyId!;
-                                                                                         companylistid= companyId1;
-                                                                                        await viewCompanyProvider.viewCompanyList(companyId1);
-                                                                                        if(viewCompanyProvider.viewCompanyData.isNotEmpty){
-                                                                                          final viewCompany= viewCompanyProvider.viewCompanyData[0];
-                                                                                        companyname.text= viewCompany.companyName?? '';
-                                                                                        displayname.text= viewCompany.kioskDisplayName?? '';
-                                                                                        // uag.text= viewCompany.uag?? '';
-                                                                                        contactname.text= viewCompany.contactPerson?? '';
-                                                                                        contactno.text= viewCompany.contactNo?? '';
-
-
-                                                                                          viewCompany.companySp =="1"? isSwitchOn= true : false;
-                                                                                          viewCompany.companySr =="1"? isSwitchOn2 = true : false;
-                                                                                          viewCompany.companyVendor == "1"? isSwitchOn3 =true : false;
-                                                                                          viewCompany.showVms =="1" ? isSwitchOn4= true : false;
-
-                                                                                        viewcompany= true;
-
-                                                                                        Navigator.of(context).pushReplacement(
-                                                                                          MaterialPageRoute(
-                                                                                            builder: (BuildContext context) =>  const Addcompany(),
-                                                                                          ),
-                                                                                        );
-                                                                                        }
-
-                                                                                      },
-                                                                                    ),
-                                                                                  ),
-                                                                                  PopupMenuItem(
-                                                                                    value: 'edit',
-                                                                                    child: InkWell(
-                                                                                      child: Row(
-                                                                                        children: [
-                                                                                          Icon(Icons.edit, size: 20,color: kDarkblueColor,),
-                                                                                          const SizedBox(
-                                                                                            width: 10,
-                                                                                          ),
-                                                                                          Text('Edit', style: GoogleFonts.poppins(
-                                                                                            color: Colors.black,
-                                                                                            fontWeight: FontWeight.w500,
-                                                                                            fontSize: 17.0,
-                                                                                          )),
-                                                                                        ],
-                                                                                      ),
-                                                                                      onTap: () async{
-                                                                                        companyId1= company.companyId!;
-                                                                                        companylistid= companyId1;
-                                                                                        await viewCompanyProvider.viewCompanyList(companyId1);
-                                                                                        if(viewCompanyProvider.viewCompanyData.isNotEmpty){
-                                                                                          final viewCompany= viewCompanyProvider.viewCompanyData[0];
-                                                                                          companyname.text= viewCompany.companyName?? '';
-                                                                                          displayname.text= viewCompany.kioskDisplayName?? '';
-                                                                                          // uag.text= viewCompany.uag?? '';
-                                                                                          contactname.text= viewCompany.contactPerson?? '';
-                                                                                          contactno.text= viewCompany.contactNo?? '';
-
-                                                                                          viewCompany.companySp =="1"? isSwitchOn= true : false;
-                                                                                          viewCompany.companySr =="1"? isSwitchOn2 = true : false;
-                                                                                          viewCompany.companyVendor == "1"? isSwitchOn3 =true : false;
-                                                                                          viewCompany.showVms =="1" ? isSwitchOn4= true : false;
-
-                                                                                          // Split the values by comma
-                                                                                          List<String>? towers = viewCompany.towerId?.split(',');
-                                                                                          List<String>? floors = viewCompany.floorId?.split(',');
-                                                                                          List<String>? unitNos = viewCompany.unitNo?.split(',');
-                                                                                          List<String>? areas = viewCompany.area?.split(',');
-                                                                                          List<String>? occupancies = viewCompany.occupancy?.split(',');
-                                                                                          List<String>? staffNos = viewCompany.noOfStaff?.split(',');
-
-                                                                                          // Clear previous data in the DatatableProvider before adding new data
-                                                                                          Provider.of<DatatableProvider>(context, listen: false).clearData();
-
-                                                                                          // Insert each row in the DataTable by iterating through the list of towers
-                                                                                          for (int i = 0; i < towers!.length; i++) {
-                                                                                            Provider.of<DatatableProvider>(context, listen: false).addCompanyData(
-                                                                                              tower: towers[i].trim(),        // Add tower
-                                                                                              floor: floors![i].trim(),        // Add corresponding floor
-                                                                                              unitno: unitNos![i].trim(),      // Add corresponding unit no
-                                                                                              area: areas![i].trim(),          // Add corresponding area
-                                                                                              occupancy: occupancies![i].trim(), // Add corresponding occupancy
-                                                                                              staffno: staffNos![i].trim(),    // Add corresponding staff number
-                                                                                            );
-                                                                                          }
-
-                                                                                          isupdatecompany= true;
-                                                                                          Navigator.of(context).pushReplacement(
-                                                                                            MaterialPageRoute(
-                                                                                              builder: (BuildContext context) =>  const Addcompany(),
+                                                                      Consumer<InsertCompanyProvider>(
+                                                                          builder: (context, value, child) {
+                                                                            return Positioned(
+                                                                                top: 1.0,
+                                                                                right: 4.0,
+                                                                                child: SizedBox(
+                                                                                  child: PopupMenuButton(
+                                                                                    icon: Icon(Icons.more_horiz),
+                                                                                    itemBuilder: (context) {
+                                                                                      return [
+                                                                                        PopupMenuItem(
+                                                                                          value: 'view',
+                                                                                          child: InkWell(
+                                                                                            child: Row(
+                                                                                              children: [
+                                                                                                Icon(Icons.remove_red_eye, size: 20,color: kDarkblueColor,),
+                                                                                                const SizedBox(
+                                                                                                  width: 10,
+                                                                                                ),
+                                                                                                Text('View', style: GoogleFonts.poppins(
+                                                                                                  color: Colors.black,
+                                                                                                  fontWeight: FontWeight.w500,
+                                                                                                  fontSize: 17.0,
+                                                                                                )),
+                                                                                              ],
                                                                                             ),
-                                                                                          );
-                                                                                        }
+                                                                                            onTap: () async{
+                                                                                              companyProvider.companyId1= company.companyId!;
+                                                                                              companyProvider.companyListid= companyProvider.companyId1;
+                                                                                              await companyProvider.viewCompanyList(companyProvider.companyId1);
+                                                                                              if(companyProvider.viewCompanyData.isNotEmpty){
+                                                                                                final viewCompany= companyProvider.viewCompanyData[0];
+                                                                                                value.companyName.text= viewCompany.companyName?? '';
+                                                                                                value.displayName.text= viewCompany.kioskDisplayName?? '';
+                                                                                                // uag.text= viewCompany.uag?? '';
+                                                                                                value.contactName.text= viewCompany.contactPerson?? '';
+                                                                                                value.contactNo.text= viewCompany.contactNo?? '';
 
-                                                                                      },
-                                                                                    ),
-                                                                                  ),
-                                                                                  PopupMenuItem(
-                                                                                    value: 'delete',
-                                                                                    child: InkWell(
-                                                                                      child: Row(
-                                                                                        children: [
-                                                                                          Icon(Icons.delete, size: 20,color: kDarkblueColor,),
-                                                                                          const SizedBox(
-                                                                                            width: 10,
+
+                                                                                                viewCompany.companySp =="1"? value.isSwitchOn= true : false;
+                                                                                                viewCompany.companySr =="1"? value.isSwitchOn2 = true : false;
+                                                                                                viewCompany.companyVendor == "1"? value.isSwitchOn3 =true : false;
+                                                                                                viewCompany.showVms =="1" ? value.isSwitchOn4= true : false;
+
+                                                                                                value.viewCompany= true;
+
+                                                                                                Navigator.of(context).pushReplacement(
+                                                                                                  MaterialPageRoute(
+                                                                                                    builder: (BuildContext context) =>  const AddCompany(),
+                                                                                                  ),
+                                                                                                );
+                                                                                              }
+
+                                                                                            },
                                                                                           ),
-                                                                                          Text('Delete', style: GoogleFonts.poppins(
-                                                                                            color: Colors.black,
-                                                                                            fontWeight: FontWeight.w500,
-                                                                                            fontSize: 17.0,
-                                                                                          )),
-                                                                                        ],
-                                                                                      ),
-                                                                                      onTap: () async{
-                                                                                        companyId1= company.companyId!;
-                                                                                        await deleteCompanyProvider.deleteCompany(companyId1);
-                                                                                        Navigator.pop(context);
-                                                                                      },
-                                                                                    ),
+                                                                                        ),
+                                                                                        PopupMenuItem(
+                                                                                          value: 'edit',
+                                                                                          child: InkWell(
+                                                                                            child: Row(
+                                                                                              children: [
+                                                                                                Icon(Icons.edit, size: 20,color: kDarkblueColor,),
+                                                                                                const SizedBox(
+                                                                                                  width: 10,
+                                                                                                ),
+                                                                                                Text('Edit', style: GoogleFonts.poppins(
+                                                                                                  color: Colors.black,
+                                                                                                  fontWeight: FontWeight.w500,
+                                                                                                  fontSize: 17.0,
+                                                                                                )),
+                                                                                              ],
+                                                                                            ),
+                                                                                            onTap: () async{
+                                                                                              companyProvider.companyId1= company.companyId!;
+                                                                                              companyProvider.companyListid= companyProvider.companyId1;
+                                                                                              await companyProvider.viewCompanyList(companyProvider.companyId1);
+                                                                                              if(companyProvider.viewCompanyData.isNotEmpty){
+                                                                                                final viewCompany= companyProvider.viewCompanyData[0];
+                                                                                                value.companyName.text= viewCompany.companyName?? '';
+                                                                                                value.displayName.text= viewCompany.kioskDisplayName?? '';
+                                                                                                // uag.text= viewCompany.uag?? '';
+                                                                                                value.contactName.text= viewCompany.contactPerson?? '';
+                                                                                                value.contactNo.text= viewCompany.contactNo?? '';
+
+                                                                                                viewCompany.companySp =="1"? value.isSwitchOn= true : false;
+                                                                                                viewCompany.companySr =="1"? value.isSwitchOn2 = true : false;
+                                                                                                viewCompany.companyVendor == "1"? value.isSwitchOn3 =true : false;
+                                                                                                viewCompany.showVms =="1" ? value.isSwitchOn4= true : false;
+
+                                                                                                // Split the values by comma
+                                                                                                List<String>? towers = viewCompany.towerId?.split(',');
+                                                                                                List<String>? floors = viewCompany.floorId?.split(',');
+                                                                                                List<String>? unitNos = viewCompany.unitNo?.split(',');
+                                                                                                List<String>? areas = viewCompany.area?.split(',');
+                                                                                                List<String>? occupancies = viewCompany.occupancy?.split(',');
+                                                                                                List<String>? staffNos = viewCompany.noOfStaff?.split(',');
+
+                                                                                                // Clear previous data in the DatatableProvider before adding new data
+                                                                                                Provider.of<DatatableProvider>(context, listen: false).clearData();
+
+                                                                                                // Insert each row in the DataTable by iterating through the list of towers
+                                                                                                for (int i = 0; i < towers!.length; i++) {
+                                                                                                  Provider.of<DatatableProvider>(context, listen: false).addCompanyData(
+                                                                                                    tower: towers[i].trim(),        // Add tower
+                                                                                                    floor: floors![i].trim(),        // Add corresponding floor
+                                                                                                    unitno: unitNos![i].trim(),      // Add corresponding unit no
+                                                                                                    area: areas![i].trim(),          // Add corresponding area
+                                                                                                    occupancy: occupancies![i].trim(), // Add corresponding occupancy
+                                                                                                    staffno: staffNos![i].trim(),    // Add corresponding staff number
+                                                                                                  );
+                                                                                                }
+
+                                                                                                value.isUpdateCompany= true;
+                                                                                                Navigator.of(context).pushReplacement(
+                                                                                                  MaterialPageRoute(
+                                                                                                    builder: (BuildContext context) =>  const AddCompany(),
+                                                                                                  ),
+                                                                                                );
+                                                                                              }
+
+                                                                                            },
+                                                                                          ),
+                                                                                        ),
+                                                                                        PopupMenuItem(
+                                                                                          value: 'delete',
+                                                                                          child: InkWell(
+                                                                                            child: Row(
+                                                                                              children: [
+                                                                                                Icon(Icons.delete, size: 20,color: kDarkblueColor,),
+                                                                                                const SizedBox(
+                                                                                                  width: 10,
+                                                                                                ),
+                                                                                                Text('Delete', style: GoogleFonts.poppins(
+                                                                                                  color: Colors.black,
+                                                                                                  fontWeight: FontWeight.w500,
+                                                                                                  fontSize: 17.0,
+                                                                                                )),
+                                                                                              ],
+                                                                                            ),
+                                                                                            onTap: () async{
+                                                                                              companyProvider.companyId1= company.companyId!;
+                                                                                              await companyProvider.deleteCompany(companyProvider.companyId1);
+                                                                                              Navigator.pop(context);
+                                                                                            },
+                                                                                          ),
+                                                                                        ),
+
+
+                                                                                      ];
+                                                                                    },
+
                                                                                   ),
-
-
-                                                                                ];
-                                                                              },
-
-                                                                            ),
-                                                                          )
+                                                                                )
+                                                                            );
+                                                                          },
                                                                       ),
+
                                                                     ],
                                                                   ),
                                                                 ),

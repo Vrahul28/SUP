@@ -63,14 +63,14 @@ final TextEditingController phone_misit= TextEditingController();
 final TextEditingController shiftstart_misit= TextEditingController();
 final TextEditingController shiftend_misit= TextEditingController();
 
-class Permittowork extends StatefulWidget {
-  const Permittowork({super.key});
+class PermitToWork extends StatefulWidget {
+  const PermitToWork({super.key});
 
   @override
-  State<Permittowork> createState() => _PermittoworkState();
+  State<PermitToWork> createState() => _PermitToWorkState();
 }
 
-class _PermittoworkState extends State<Permittowork> {
+class _PermitToWorkState extends State<PermitToWork> {
   String? _selectedOption1;
   String? _selectedOption2;
   String? _selectedOption3;
@@ -664,7 +664,7 @@ class _PermittoworkState extends State<Permittowork> {
                           SizedBox(height: 20),
                           Visibility(
                             visible: workHeight,
-                              child: WokringAtHeight(
+                              child: WorkingAtHeight(
                                 controller: detail_work,
                                 controller2: startdate_work,
                                 controller3: starttime_work,

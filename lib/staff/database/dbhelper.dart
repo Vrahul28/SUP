@@ -1,31 +1,32 @@
 import 'dart:io';
 import 'package:acp/facilitybookingpage/service.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
+import '../../Provider/Company/Company_Provider.dart';
+import '../../Provider/Staff/Staff_Provider.dart';
 import '../../appDashboard/dashboard/gridlayout2.dart';
 import '../../blacklist/addblacklist/addblacklistmodel.dart';
-import '../../blacklist/blacklist.dart';
 import '../../company/addcompany/addcompanymodel.dart';
 import '../../company/addcompany/additionaldetailscompany.dart';
-import '../../company/companyscreen.dart';
 import '../../facilitybookingpage/facilitybooking.dart';
-import '../staffscreen.dart';
 import 'addstaffmodel.dart';
 
-List<Addcompanymodel> allcompany= [];
-List<Additionalcompanydata> additionalcompanydata= [];
-List<Addstaffmodel> allstaff= [];
-List<Addbacklistmodel> blacklisted= [];
-List<Service> allevents= [];
+List<Addcompanymodel> allCompany= [];
+List<Additionalcompanydata> additionalCompanyData= [];
+List<Addstaffmodel> allStaff= [];
+List<AddBackListModel> blacklisted= [];
+List<Service> allEvents= [];
 String total= '';
+TextEditingController totalBlackList= TextEditingController();
 
-class DBhelper{
+class DBHelper{
   static Database? _database;
-  static final DBhelper db = DBhelper._();
+  static final DBHelper db = DBHelper._();
 
-  DBhelper._();
+  DBHelper._();
 
   Future<Database?> get database async {
     // If database exists, return database
@@ -141,7 +142,7 @@ class DBhelper{
         'STAFF', newstaff.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace
     );
-   print(newstaff.profileImage);
+   debugPrint(newstaff.profileImage);
 
     return res;
   }
@@ -153,7 +154,7 @@ class DBhelper{
         'TANADMINSTAFF', newstaff.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace
     );
-    print(newstaff.profileImage);
+    debugPrint(newstaff.profileImage);
 
     return res;
   }
@@ -165,7 +166,7 @@ class DBhelper{
         'COMPANY', newcompany.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace
     );
-    print(newcompany.companyName);
+    debugPrint(newcompany.companyName);
 
     return res;
   }
@@ -177,14 +178,14 @@ class DBhelper{
         'ADDCOMPANYDATA', newdata.toJson(),
         conflictAlgorithm: ConflictAlgorithm.replace
     );
-    print(newdata.tower);
+    debugPrint(newdata.tower);
 
     return res;
   }
 
   // Insert blacklist on database
 
-  createBlacklist(Addbacklistmodel newblacklist) async {
+  createBlacklist(AddBackListModel newblacklist) async {
     blacklisted.clear();
     final Database db = await initDB();
     final res = await db.insert(
@@ -244,24 +245,24 @@ class DBhelper{
   }
 
   // Delete alldata  company
-  Future<int?> deleteaddCompany(Additionalcompanydata updatedata) async {
+  Future<int?> deleteAddCompany(Additionalcompanydata updateData) async {
     final db = await database;
     final res = await db?.delete(
       'ADDCOMPANYDATA',
       where: 'id = ?',
-      whereArgs: [updatedata.id],
+      whereArgs: [updateData.id],
     );
 
     return res;
   }
 
   // Delete all black
-  Future<int?> deleteBlacklist(Addbacklistmodel updatedblack) async {
+  Future<int?> deleteBlacklist(AddBackListModel updatedBlack) async {
     final db = await database;
     final res = await db?.delete(
       'BLACKLISTED',
       where: 'visitorBlackListId = ?',
-      whereArgs: [updatedblack.visitorBlackListId],
+      whereArgs: [updatedBlack.visitorBlackListId],
     );
 
     return res;
@@ -270,7 +271,7 @@ class DBhelper{
 
   // Delete all Events
 
-  Future<int?> deletetask(Service service) async {
+  Future<int?> deleteTask(Service service) async {
     final db = await database;
     final res = await db?.delete(
       'SERVICE',
@@ -282,89 +283,93 @@ class DBhelper{
   }
 
   // Read staff Data
-  Future<List<Addstaffmodel>> getAllstaff(String query, String query2) async {
+  Future<List<Addstaffmodel>> getAllStaff(String query, String query2, BuildContext context) async {
+    final staff= context.read<StaffProvider>();
+
     final db = await database;
     var result = await db!.query('STAFF');
-    allstaff.clear();
+    allStaff.clear();
 
     for(var item in result){
-      allstaff.add(Addstaffmodel.fromJson(item));
+      allStaff.add(Addstaffmodel.fromJson(item));
     }
 
 
-    total= allstaff.length.toString();
+    total= allStaff.length.toString();
 
-    if(query!=null){
-      allstaff =   allstaff
+    if(query.isNotEmpty){
+      allStaff =   allStaff
           .where((code) =>
       code.company?.toLowerCase().contains(query.toLowerCase()) ??
           false)
           .toList();
-      totalstaff.text= allstaff.length.toString();
+      staff.totalStaff.text= allStaff.length.toString();
     }
 
-    if(query2!=null){
-      allstaff =   allstaff
+    if(query2.isNotEmpty){
+      allStaff =   allStaff
           .where((code) =>
       code.firstName?.toLowerCase().contains(query2.toLowerCase()) ??
           false)
           .toList();
-      totalstaff.text= allstaff.length.toString();
+      staff.totalStaff.text= allStaff.length.toString();
     }
 
     await db.rawUpdate('''UPDATE STAFF
-    SET total_staff_count = ?''', [allstaff.length]);
+    SET total_staff_count = ?''', [allStaff.length]);
 
 
-    return allstaff;
+    return allStaff;
   }
 
   // Read Tan staff Data
-  Future<List<Addstaffmodel>> getTanstaff(String query) async {
+  Future<List<Addstaffmodel>> getTanStaff(String query) async {
     final db = await database;
     var result = await db!.query('TANADMINSTAFF');
-    allstaff.clear();
+    allStaff.clear();
     for(var item in result){
-      allstaff.add(Addstaffmodel.fromJson(item));
+      allStaff.add(Addstaffmodel.fromJson(item));
     }
-    total= allstaff.length.toString();
-    totalgrid.text= allstaff.length.toString();
+    total= allStaff.length.toString();
+    totalgrid.text= allStaff.length.toString();
 
-      if(query!=null){
-        allstaff =   allstaff
+      if(query.isNotEmpty){
+        allStaff =   allStaff
             .where((code) =>
         code.firstName?.toLowerCase().contains(query.toLowerCase()) ??
             false)
             .toList();
-        total= allstaff.length.toString();
+        total= allStaff.length.toString();
       }
 
 
 
-    return allstaff;
+    return allStaff;
   }
 
   // Read company Data
 
-  Future<List<Addcompanymodel>> getAllCompany(String query, String query2, String query3) async {
+  Future<List<Addcompanymodel>> getAllCompany(String query, String query2, String query3, BuildContext context) async {
+    final company= context.read<CompanyProvider>();
+
     final db = await database;
     var result = await db!.query('COMPANY');
-    allcompany.clear();
+    allCompany.clear();
     for(var item in result){
-      allcompany.add(Addcompanymodel.fromJson(item));
+      allCompany.add(Addcompanymodel.fromJson(item));
       print(item);
     }
 
-    if(query!=null){
-      allcompany =   allcompany
+    if(query.isNotEmpty){
+      allCompany =   allCompany
           .where((code) =>
       code.tower?.toLowerCase().contains(query.toLowerCase()) ??
           false)
           .toList();
     }
 
-    if(query2!=null){
-      allcompany =   allcompany
+    if(query2.isNotEmpty){
+      allCompany =   allCompany
           .where((code) =>
       code.companyName?.toLowerCase().contains(query2.toLowerCase()) ??
           false)
@@ -372,38 +377,37 @@ class DBhelper{
 
     }
 
-    if(query3!=null){
-      allcompany =   allcompany
+    if(query3.isNotEmpty){
+      allCompany =   allCompany
           .where((code) =>
       code.unitNO?.toLowerCase().contains(query3.toLowerCase()) ??
           false)
           .toList();
     }
 
+    company.allResult.text= allCompany.length.toString();
 
-
-    allresult.text= allcompany.length.toString();
-
-    return allcompany;
+    return allCompany;
   }
 
   // Read Additional company Data
 
-  Future<List<Additionalcompanydata>> getaddCompanydata() async {
+  Future<List<Additionalcompanydata>> getAddCompanyData() async {
     final db = await database;
     var result = await db!.query(
         'ADDCOMPANYDATA',
       // where: 'companyId = ?',
       // whereArgs: [id],
     );
-    additionalcompanydata.clear();
+    additionalCompanyData.clear();
+
     for(var item in result){
-      additionalcompanydata.add(Additionalcompanydata.fromJson(item));
+      additionalCompanyData.add(Additionalcompanydata.fromJson(item));
     }
 
     // allresult.text= additionalcompanydata.length.toString();
 
-    return additionalcompanydata;
+    return additionalCompanyData;
   }
 
 
@@ -414,28 +418,28 @@ class DBhelper{
       where: 'companyId = ?',
       whereArgs: [id],
     );
-    additionalcompanydata.clear();
+    additionalCompanyData.clear();
     for(var item in result){
-      additionalcompanydata.add(Additionalcompanydata.fromJson(item));
+      additionalCompanyData.add(Additionalcompanydata.fromJson(item));
       print("item of list: $item");
     }
     // allresult.text= additionalcompanydata.length.toString();
 
-    return additionalcompanydata;
+    return additionalCompanyData;
   }
 
   Future<List<Additionalcompanydata>> getaddCompanydata2(String query, String query2) async {
     final db = await database;
     var result = await db!.rawQuery('''
     SELECT * FROM ADDCOMPANYDATA WHERE id IN (SELECT MIN(id) FROM ADDCOMPANYDATA GROUP BY companyId)''');
-    additionalcompanydata.clear();
+    additionalCompanyData.clear();
     for(var item in result){
-      additionalcompanydata.add(Additionalcompanydata.fromJson(item));
+      additionalCompanyData.add(Additionalcompanydata.fromJson(item));
       print(item);
     }
 
     if(query.isNotEmpty){
-      additionalcompanydata = additionalcompanydata
+      additionalCompanyData = additionalCompanyData
           .where((code) =>
       code.tower?.toLowerCase().contains(query.toLowerCase()) ??
           false)
@@ -443,7 +447,7 @@ class DBhelper{
     }
 
     if(query2.isNotEmpty){
-      additionalcompanydata = additionalcompanydata
+      additionalCompanyData =additionalCompanyData
           .where((code) =>
       code.unitNO?.toLowerCase().contains(query2.toLowerCase()) ??
           false)
@@ -451,20 +455,20 @@ class DBhelper{
     }
 
 
-    return additionalcompanydata;
+    return additionalCompanyData;
   }
 
   // Read blacklist Data
 
-  Future<List<Addbacklistmodel>> getAllblacklist(String query, String query2) async {
+  Future<List<AddBackListModel>> getAllBlackList(String query, String query2) async {
 
     final db = await database;
     final result = await db!.query('BLACKLISTED');
     blacklisted.clear();
     for(var item in result){
-      blacklisted.add(Addbacklistmodel.fromJson(item));
+      blacklisted.add(AddBackListModel.fromJson(item));
     }
-    if(query!=null){
+    if(query.isEmpty){
       blacklisted =   blacklisted
           .where((code) =>
       code.documentNumber?.toLowerCase().contains(query.toLowerCase()) ??
@@ -473,46 +477,46 @@ class DBhelper{
       // total= allstaff.length.toString();
     }
 
-    if(query2!=null){
-      blacklisted =    blacklisted
+    if(query2.isEmpty){
+      blacklisted = blacklisted
           .where((code) =>
       code.visitorName?.toLowerCase().contains(query2.toLowerCase()) ??
           false)
           .toList();
       // total= allstaff.length.toString();
     }
-    totalblacklist.text =blacklisted.length.toString();
+    totalBlackList.text = blacklisted.length.toString();
 
     return  blacklisted;
   }
 
   //  Read Event
 
-  Future<List<Service>> getAllevnts() async {
+  Future<List<Service>> getAllEvents() async {
 
     final db = await database;
-    final result = await db!.query('SERVICE', where: 'date = ?', whereArgs: [selecteddate.text]);
+    final result = await db!.query('SERVICE', where: 'date = ?', whereArgs: [selectedDate.text]);
     // if(selecteddate.text.isEmpty){
     //   result = await db!.query('SERVICE');
     // }else{
     //
     // }
-    allevents.clear();
+    allEvents.clear();
     for(var item in result){
-      allevents.add(Service.fromJson(item));
+      allEvents.add(Service.fromJson(item));
     }
 
-    return  allevents;
+    return  allEvents;
   }
 
   // Update company in the database
-  Future<int?> updateCompany(Addcompanymodel updatedcompany) async {
+  Future<int?> updateCompany(Addcompanymodel updatedCompany) async {
     final db = await database;
     final res1 = await db?.update(
       'COMPANY',
-      updatedcompany.toJson(),
+      updatedCompany.toJson(),
       where: 'companyId = ?',
-      whereArgs: [updatedcompany.companyId],
+      whereArgs: [updatedCompany.companyId],
     );
     print("update company: $res1");
 
@@ -522,13 +526,13 @@ class DBhelper{
 
   // Update Additional company data in the database
 
-  Future<int?> updateaddCompanydata(Additionalcompanydata updatedcompany) async {
+  Future<int?> updateaddCompanydata(Additionalcompanydata updatedCompany) async {
     final db = await database;
     final res1 = await db?.update(
       'ADDCOMPANYDATA',
-      updatedcompany.toJson(),
+      updatedCompany.toJson(),
       where: 'id = ?',
-      whereArgs: [updatedcompany.id],
+      whereArgs: [updatedCompany.id],
     );
     print("update company2: $res1");
 
@@ -568,7 +572,7 @@ class DBhelper{
 
   // Update Blacklist in the database
 
-  Future<int?> updateBlacklist(Addbacklistmodel updatelist) async {
+  Future<int?> updateBlacklist(AddBackListModel updatelist) async {
 
     final db = await database;
     final res2 = await db?.update(

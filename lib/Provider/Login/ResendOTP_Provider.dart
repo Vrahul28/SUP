@@ -8,12 +8,12 @@ class ResendotpProvider extends ChangeNotifier{
 
   Future<bool> resendOTP(String email, String userId, String status) async{
     String url= "http://111.223.92.154:8091/acp_api/resendOtp.php";
-    String completeurl= url;
+    String completeUrl= url;
 
     HttpOverrides.global = MyHttpOverrides();
 
     var response = await http.post(
-        Uri.parse(completeurl),
+        Uri.parse(completeUrl),
         headers: <String, String>{
           'Accept': 'application/json'
         },
@@ -27,11 +27,11 @@ class ResendotpProvider extends ChangeNotifier{
     try{
       if(response.statusCode==200){
         var responseBody= jsonDecode(response.body);
-        print(responseBody);
+        debugPrint(responseBody);
         return true;
       }
     }catch(e){
-      print(e);
+      debugPrint(e.toString());
       return false;
     }
     return false;

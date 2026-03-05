@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:provider/provider.dart';
 import 'package:acp/company/addcompany/floor.dart';
-import 'package:acp/login.dart';
+import 'package:acp/login/login.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:multiselect_formfield/multiselect_formfield.dart';
+import '../../Provider/Login/Login_Provider.dart';
 import '../../company/companymethods.dart';
 import '../../company/companymodel.dart';
 import '../../utils/colors.dart';
@@ -34,6 +35,7 @@ class Location extends StatefulWidget {
 class _LocationState extends State<Location> {
   @override
   Widget build(BuildContext context) {
+    final login= context.read<LoginProvider>();
     return Padding(
       padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
       child: TypeAheadField<Company?>(
@@ -139,7 +141,7 @@ Future<void> getFloor(String towerID) async{
 
   if(response.statusCode==200){
     var jsonresponse= jsonDecode(response.body);
-    print(jsonresponse);
+    debugPrint(jsonresponse);
     for(var item in jsonresponse){
       final floor= Floor.fromJson(item);
       floorData.add(floor);
@@ -376,6 +378,7 @@ class _Uag1State extends State<Uag1> {
 
   @override
   Widget build(BuildContext context) {
+    final login= context.read<LoginProvider>();
     return Padding(
         padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
         child: Card(
@@ -420,7 +423,7 @@ class _Uag1State extends State<Uag1> {
             //     : [],
             initialValue: selectedTowers,
             onSaved: (value) {
-              if(usernameController.text == "admin@gmail.com"){
+              if(login.usernameController.text == "admin@gmail.com"){
                 if (value == null) return;
                 setState(() {
                   selectedTowers = value.cast<String>();
@@ -456,7 +459,7 @@ void dateRange(BuildContext context, TextEditingController Startdate) async{
     String endDate = "${range.end.month}/${range.end.day}/${range.end.year}";
 
     Startdate.text = "$startDate 12:00 AM - $endDate 11:59 PM";
-    print(Startdate.text);
+    debugPrint(Startdate.text);
   }
 
 }

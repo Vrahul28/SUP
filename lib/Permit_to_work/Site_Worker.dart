@@ -117,7 +117,7 @@ class _SiteWorkerState extends State<SiteWorker> {
                     onChanged: (int? value) {
                       setState(() {
                         _selectedValue = value!;
-                        print(_selectedValue);
+                        debugPrint(_selectedValue.toString());
                       });
                     },
                   ),
@@ -131,7 +131,7 @@ class _SiteWorkerState extends State<SiteWorker> {
                     onChanged: (int? value) {
                       setState(() {
                         _selectedValue = value!;
-                        print(_selectedValue);
+                        debugPrint(_selectedValue.toString());
                       });
                     },
                   ),
@@ -177,10 +177,10 @@ class _SiteWorkerState extends State<SiteWorker> {
               ),
               initialCountryCode: 'IN', // Default to India
               onChanged: (phone) {
-                print(phone.completeNumber); // Output complete number with country code
+                debugPrint(phone.completeNumber); // Output complete number with country code
               },
               onCountryChanged: (country) {
-                print('Country changed to: ' + country.name);
+                debugPrint('Country changed to: ' + country.name);
               },
               dropdownTextStyle: GoogleFonts.poppins(
                   color: kDarkblueColor,

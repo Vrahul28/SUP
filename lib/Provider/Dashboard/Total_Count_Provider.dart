@@ -13,12 +13,12 @@ class TotalCountProvider extends ChangeNotifier{
   Future<void> getTotalCompanies() async{
 
     String url= "http://111.223.92.154:8091/acp_api/companyManagement.php?total=true";
-    String completeurl= url;
+    String completeUrl= url;
 
     HttpOverrides.global = MyHttpOverrides();
 
     var response = await http.get(
-      Uri.parse(completeurl),
+      Uri.parse(completeUrl),
       headers: <String, String>{
         'Content-Type': 'application/x-www-form-urlencoded'
       },

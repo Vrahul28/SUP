@@ -1,30 +1,33 @@
+import 'package:acp/Provider/Company/Insert_Company_Provider.dart';
 import 'package:acp/company/addcompany/addcompany.dart';
 import 'package:acp/staff/database/dbhelper.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:provider/provider.dart';
+import '../../Provider/Company/Company_Provider.dart';
 import '../../appDashboard/dashboard/dashboard.dart';
 import '../../utils/colors.dart';
-import '../companyscreen.dart';
 import 'addcompanymodel.dart';
 
-class Addcompanydata extends StatefulWidget {
-  const Addcompanydata({super.key});
+class AddCompanyData extends StatefulWidget {
+  const AddCompanyData({super.key});
 
   @override
-  State<Addcompanydata> createState() => _AddcompanydataState();
+  State<AddCompanyData> createState() => _AddCompanyDataState();
 }
 
-class _AddcompanydataState extends State<Addcompanydata> {
+class _AddCompanyDataState extends State<AddCompanyData> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ScrollController _scrollController = ScrollController();
-  DBhelper db= DBhelper.db;
+  DBHelper db= DBHelper.db;
   @override
   Widget build(BuildContext context) {
+    final company= context.read<InsertCompanyProvider>();
+    final companyPro= context.read<CompanyProvider>();
     return Material(
       child: Scaffold(
         body: Form(
-          key: this._formKey,
+          key: _formKey,
           child: CustomScrollView(
               slivers: <Widget>[
                 SliverAppBar(
@@ -46,22 +49,12 @@ class _AddcompanydataState extends State<Addcompanydata> {
 
                     ),
                     onPressed: () {
-                      companyname.clear();
-                      displayname.clear();
-                      uag.clear();
-                      contactname.clear();
-                      contactno.clear();
-                      towercompany.clear();
-                      floor.clear();
-                      unitno.clear();
-                      area.clear();
-                      occupancy.clear();
-                      staffno.clear();
+                      company.clearController();
 
                       setState(() {
-                        isSwitchOn = false;
-                        isSwitchOn2 = false;
-                        isSwitchOn3 = false;
+                        company.isSwitchOn = false;
+                        company.isSwitchOn2 = false;
+                        company.isSwitchOn3 = false;
                       });
 
                       Navigator.of(context).pushReplacement(
@@ -79,11 +72,16 @@ class _AddcompanydataState extends State<Addcompanydata> {
                       [
                         Padding(
                           padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0, top: 0.0),
-                          child: Container(
+                          child: SizedBox(
                               width: (MediaQuery.of(context).size.width),
                               height: (MediaQuery.of(context).size.height),
                               child:  FutureBuilder(
-                                future: db.getAllCompany(towercodeclass.text,companycodeclass.text, unitnoclass.text),
+                                future: db.getAllCompany(
+                                    companyPro.towerCodeClass.text,
+                                    companyPro.companyCodeClass.text,
+                                    companyPro.unitNoClass.text,
+                                  context
+                                ),
                                 builder: (context, snapshot) {
                                   if(snapshot.connectionState == ConnectionState.waiting){
                                     return Center(
@@ -125,9 +123,9 @@ class _AddcompanydataState extends State<Addcompanydata> {
                                         Expanded(
                                           child: ListView.builder(
                                             controller: _scrollController,
-                                            itemCount: allcompany.length,
+                                            itemCount: allCompany.length,
                                             itemBuilder:(context, index) {
-                                              final company= allcompany[index];
+                                              final company1= allCompany[index];
                                                 return Card(
                                                   child:  Column(
                                                     children: [
@@ -156,15 +154,15 @@ class _AddcompanydataState extends State<Addcompanydata> {
                                                                     onTap: () {
                                                                       Navigator.of(context).pushReplacement(
                                                                         MaterialPageRoute(
-                                                                          builder: (BuildContext context) => Addcompany(),
+                                                                          builder: (BuildContext context) => AddCompany(),
                                                                         ),
                                                                       );
-                                                                      id1= company.companyId!;
-                                                                      companyname.text= company.companyName!;
-                                                                      displayname.text= company.displayName!;
-                                                                      uag.text= company.UAG!;
-                                                                      contactname.text= company.contactName!;
-                                                                      contactno.text= company.contactNO!;
+                                                                      company.id1= company1.companyId!;
+                                                                      company.companyName.text= company1.companyName!;
+                                                                      company.displayName.text= company1.displayName ?? '';
+                                                                      company.uag.text= company1.UAG!;
+                                                                      company.contactName.text= company1.contactName ?? '';
+                                                                      company.contactNo.text= company1.contactNO!;
                                                                       // tower.text= company.tower!;
                                                                       // floor.text= company.floor!;
                                                                       // unitno.text= company.unitNO!;
@@ -172,12 +170,12 @@ class _AddcompanydataState extends State<Addcompanydata> {
                                                                       // occupancy.text= company.occupancy!;
                                                                       // staffno.text= company.staffNO!;
 
-                                                                      viewcompany= true;
+                                                                      company.viewCompany= true;
 
                                                                       setState(() {
-                                                                        isSwitchOn = true;
-                                                                        isSwitchOn2 = true;
-                                                                        isSwitchOn3 = true;
+                                                                        company.isSwitchOn = true;
+                                                                        company.isSwitchOn2 = true;
+                                                                        company.isSwitchOn3 = true;
                                                                       });
 
 
@@ -204,15 +202,15 @@ class _AddcompanydataState extends State<Addcompanydata> {
                                                                     onTap: () {
                                                                       Navigator.of(context).pushReplacement(
                                                                         MaterialPageRoute(
-                                                                          builder: (BuildContext context) => Addcompany(),
+                                                                          builder: (BuildContext context) => AddCompany(),
                                                                         ),
                                                                       );
-                                                                      id1= company.companyId!;
-                                                                      companyname.text= company.companyName!;
-                                                                      displayname.text= company.displayName!;
-                                                                      uag.text= company.UAG!;
-                                                                      contactname.text= company.contactName!;
-                                                                      contactno.text= company.contactNO!;
+                                                                      company.id1= company1.companyId!;
+                                                                      company.companyName.text= company1.companyName!;
+                                                                      company.displayName.text= company1.displayName!;
+                                                                      company.uag.text= company1.UAG!;
+                                                                      company.contactName.text= company1.contactName!;
+                                                                      company.contactNo.text= company1.contactNO!;
                                                                       // tower.text= company.tower!;
                                                                       // floor.text= company.floor!;
                                                                       // unitno.text= company.unitNO!;
@@ -221,13 +219,13 @@ class _AddcompanydataState extends State<Addcompanydata> {
                                                                       // staffno.text= company.staffNO!;
 
 
-                                                                      isupdatecompany= true;
+                                                                      company.isUpdateCompany= true;
 
 
                                                                       setState(() {
-                                                                        isSwitchOn = true;
-                                                                        isSwitchOn2 = true;
-                                                                        isSwitchOn3 = true;
+                                                                        company.isSwitchOn = true;
+                                                                        company.isSwitchOn2 = true;
+                                                                        company.isSwitchOn3 = true;
                                                                       });
 
 
@@ -252,7 +250,7 @@ class _AddcompanydataState extends State<Addcompanydata> {
                                                                       ],
                                                                     ),
                                                                     onTap: () {
-                                                                      var company11= Addcompanymodel(companyId: company.companyId);
+                                                                      var company11= Addcompanymodel(companyId: company1.companyId);
                                                                       db.deleteCompany(company11);
                                                                       Navigator.pop(context);
                                                                       setState(() {
@@ -376,7 +374,7 @@ class _AddcompanydataState extends State<Addcompanydata> {
                                                                       )),
                                                                       SizedBox(width: 5,),
                                                                       Flexible(
-                                                                        child: Text("${company.contactNO}",
+                                                                        child: Text("${company1.contactNO}",
                                                                           style: GoogleFonts.poppins(
                                                                             color: Colors.black,
                                                                             fontSize: 15.0,
@@ -395,7 +393,7 @@ class _AddcompanydataState extends State<Addcompanydata> {
                                                                       )),
                                                                       SizedBox(width: 5,),
                                                                       Expanded(
-                                                                        child: Text("${company.UAG}",
+                                                                        child: Text("${company1.UAG}",
                                                                           style: GoogleFonts.poppins(
                                                                             color: Colors.black,
                                                                             fontSize: 15.0,

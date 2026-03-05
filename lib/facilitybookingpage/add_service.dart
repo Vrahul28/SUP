@@ -13,7 +13,7 @@ TextEditingController title = TextEditingController();
 TextEditingController name = TextEditingController();
 TextEditingController phone = TextEditingController();
 TextEditingController email = TextEditingController();
-TextEditingController vehiclenumber = TextEditingController();
+TextEditingController vehicleNumber = TextEditingController();
 bool isSwimmingSelected = false;
 bool iscarparkingselected= false;
 
@@ -55,7 +55,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
  _validateData() async {
    if (title.text.isNotEmpty && name.text.isNotEmpty) {
-     DBhelper db= DBhelper.db;
+     DBHelper db= DBHelper.db;
      bool bookingExists = await db.checkExistingBooking(DateFormat.yMd().format(_selectedDate),_startTime, _endTime,title.text);
      if(bookingExists){
        Fluttertoast.showToast(msg: "The time slot is already booked, please change the booking timing");
@@ -64,19 +64,19 @@ class _AddTaskPageState extends State<AddTaskPage> {
          Service s= Service(title: title.text, name: name.text, phonenumber: phone.text, emailaddress: email.text,isCompleted: 0, date:DateFormat.yMd().format(_selectedDate), startTime: _startTime, endTime: _endTime);
          db.createService(s);
        }else if(title.text == "Car Parking"){
-         Service s= Service(title: title.text, name: name.text, phonenumber: phone.text, emailaddress: email.text, vehiclenumber: vehiclenumber.text,isCompleted: 0, date:DateFormat.yMd().format(_selectedDate), startTime: _startTime, endTime: _endTime);
+         Service s= Service(title: title.text, name: name.text, phonenumber: phone.text, emailaddress: email.text, vehiclenumber: vehicleNumber.text,isCompleted: 0, date:DateFormat.yMd().format(_selectedDate), startTime: _startTime, endTime: _endTime);
          db.createService(s);
        }
        Navigator.push(
          context,
-         MaterialPageRoute(builder: (context) => Facilitybooking()),
+         MaterialPageRoute(builder: (context) => FacilityBooking()),
        );
        title.clear();
        name.clear();
        phone.clear();
        email.clear();
        duration.clear();
-       vehiclenumber.clear();
+       vehicleNumber.clear();
        isSwimmingSelected = false;
        iscarparkingselected= false;
      }
@@ -144,11 +144,11 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 duration.clear();
                 phone.clear();
                 email.clear();
-                vehiclenumber.clear();
+                vehicleNumber.clear();
                 isSwimmingSelected=false;
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const Facilitybooking()),
+                  MaterialPageRoute(builder: (context) => const FacilityBooking()),
                 );
               },
               icon: Icon(Icons.arrow_back, color: Colors.black,),
@@ -349,7 +349,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   child: InputField(
                     title: 'Vehicle registration number',
                     hint: 'Enter registration number',
-                    controller: vehiclenumber,
+                    controller: vehicleNumber,
                   ),
                 ),
                 const SizedBox(

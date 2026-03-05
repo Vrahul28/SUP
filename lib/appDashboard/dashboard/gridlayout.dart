@@ -14,7 +14,7 @@ class Gridlayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loginProvider= Provider.of<LoginProvider>(context,listen: false);
+    final login= context.read<LoginProvider>();
     return GridView.count(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       crossAxisCount: 1,
@@ -23,19 +23,19 @@ class Gridlayout extends StatelessWidget {
       childAspectRatio: (1/.28),
       shrinkWrap: true, // Add this line
       physics: const NeverScrollableScrollPhysics(),
-      children: loginProvider.CompanyStaffDashboard.map((data) {
+      children: login.companyStaffDashboard.map((data) {
         return GestureDetector(
           onTap: () {
             if (data.title == "Company") {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Companyscreen()),
+                MaterialPageRoute(builder: (context) => CompanyScreen()),
               );
             }
             if (data.title == "Staff") {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Staffscreen()),
+                MaterialPageRoute(builder: (context) => StaffScreen()),
               );
             }
 
@@ -48,7 +48,7 @@ class Gridlayout extends StatelessWidget {
             if (data.title == "Booking") {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Facilitybooking()),
+                MaterialPageRoute(builder: (context) => FacilityBooking()),
               );
             }
 
