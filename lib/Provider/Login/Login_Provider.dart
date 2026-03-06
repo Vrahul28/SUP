@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:acp/OTP_Page.dart';
 import 'package:acp/Provider/Dashboard/Application_dashboard_Provider.dart';
 import 'package:acp/Provider/Login/OTP_Provider.dart';
 import 'package:acp/urls/urls.dart';
@@ -22,6 +23,7 @@ class LoginProvider extends ChangeNotifier{
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
 
+
   String? userId;
   String? email1;
   String? status;
@@ -35,66 +37,59 @@ class LoginProvider extends ChangeNotifier{
   }
 
   Future<void> loginAdmin(String email, String password, BuildContext context) async{
-    String url= Urls.loginAPI;
-    String completeUrl= url;
+    isLoading= true;
+    notifyListeners();
+
+    String url= "http://111.223.92.154:85/restApplicationUser/restApplicationUser/login";
+    debugPrint(url);
 
     HttpOverrides.global = MyHttpOverrides();
     SharedPreferences pref= await SharedPreferences.getInstance();
 
+    Map<String,  dynamic> jsonData= {
+      "username": email,
+      "password": password,
+      "country": "",
+      "ipAddress": ""
+    };
+    //
+    // // Convert the map to a JSON string
+    String jsonBody = jsonEncode(jsonData);
+    debugPrint(jsonData.toString());
+
     var response = await http.post(
-        Uri.parse(completeUrl),
+        Uri.parse(url),
         headers: <String, String>{
-          'Accept': 'application/json'
+          "Content-Type": "application/json",
+          "Accept": "application/json",
         },
-        body: {
-          "username": "vrahul2248@gmail.com",
-          "password": "Rahul@123",
-          "country": "",
-          "ipAddress": ""
-        }
+      body: jsonBody
     );
     try{
       if(response.statusCode==200){
         final data = jsonDecode(response.body);
+        debugPrint(response.body);
 
-        if(data['status'] == "1"){
-          userId = data["userId"];
-          email1 = data["email"];
+        userId = data["userId"].toString();
+        email1 = data["email"];
 
-          pref.setString("userId", userId!);
-          bool success= await user.saveUser(email, password);
+        pref.setString("userId", userId!);
+        bool success= await user.saveUser(email, password);
 
-          if(success){
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    return MainDashboard();
-                  },
-                )
-            );
-            // Navigator.push(
-            //     context,
-            //     MaterialPageRoute(builder: (context) {
-            //       return const Dashboard2();
-            //     })
-            // );
-
-            loginTODashboard(context);
-            await Provider.of<TotalCountProvider>(context, listen: false).getTotalCompanies();
-            await Provider.of<StaffProvider>(context,listen: false).getAllStaffList("", "");
-          }
-
-          isLoading = false;
-          notifyListeners();
-        }else{
-          isLoading = false;
-          final scaffoldMessengerState = ScaffoldMessenger.of(context);
-          scaffoldMessengerState.showSnackBar(
-              CustomSnackbar(text: data['message']).getSnackbar()
+        if(success){
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return OtpPage();
+                },
+              )
           );
-          notifyListeners();
+          loginTODashboard(context);
         }
+
+        isLoading = false;
+        notifyListeners();
       }
     }catch(e){
       debugPrint("Login error: $e");
@@ -106,7 +101,7 @@ class LoginProvider extends ChangeNotifier{
 
   List companyStaffDashboard= admin;
   Future<void> newList(String userRole) async{
-    if(userRole == "5"){
+    if(userRole == "1"){
       companyStaffDashboard= admin;
     }else if(userRole == "10"){
       companyStaffDashboard= staff;

@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../appDashboard/dashboard/dashboard.dart';
 import '../company/companymethods.dart';
+import '../login/userPreference.dart';
 import '../utils/Date_Formater.dart';
 import '../utils/colors.dart';
 import 'addstaff/addstaff.dart';
@@ -22,6 +23,10 @@ class StaffScreen extends StatefulWidget {
 }
 
 class _StaffScreenState extends State<StaffScreen> {
+  final FocusNode companyFocus = FocusNode();
+  final FocusNode staffFocus = FocusNode();
+  final FocusNode cardFocus = FocusNode();
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ScrollController _scrollController = ScrollController();
   DBHelper db= DBHelper.db;
@@ -33,21 +38,32 @@ class _StaffScreenState extends State<StaffScreen> {
   void initState() {
     super.initState();
     _initializePreferences();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchStaffListing();
+    });
   }
 
   // Initialize SharedPreferences asynchronously
   Future<void> _initializePreferences() async {
-    pref = await SharedPreferences.getInstance();
-    String? userRole= pref.getString('userRole');
-    if(userRole == "5"){
-      setState(() {
-        isAdmin = true;
-      });
-    }else {
-      setState(() {
-        isAdmin = false;
-      });
-    }
+    // pref = await SharedPreferences.getInstance();
+    // String? userRole= pref.getString('userRole');
+    setState(() {
+      isAdmin = true;
+    });
+    // if(userRole == "1"){
+    //   setState(() {
+    //     isAdmin = true;
+    //   });
+    // }else {
+    //   setState(() {
+    //     isAdmin = false;
+    //   });
+    // }
+  }
+
+  Future<void> fetchStaffListing() async {
+    final staffProvider = context.read<StaffProvider>();
+    await staffProvider.getAllStaffList(staffProvider.companyId.text,staffProvider.staffCodeClass.text);
   }
 
   @override
@@ -79,7 +95,6 @@ class _StaffScreenState extends State<StaffScreen> {
                       onPressed: () {
                         staffProvider.company.clear();
                         staffProvider.staffCodeClass.clear();
-                        staffProvider.isSearchStaff= false;
                         companyID.clear();
                         Navigator.of(context).pushReplacement(
                           MaterialPageRoute(
@@ -112,11 +127,12 @@ class _StaffScreenState extends State<StaffScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SizedBox(height: 20),
-                              isAdmin ? AllCompany1(controller1: staffProvider.company, hint: "Company") : const SizedBox(),
+                              isAdmin ? AllCompany1(controller1: staffProvider.company, hint: "Company",focusNode: companyFocus,) : const SizedBox(),
                                 // Staff Textfield
                                 Padding(
                                 padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
                                 child: TextFormField(
+                                  focusNode: staffFocus,
                                   controller: staffProvider.staffCodeClass,
                                   cursorColor: kDarkblueColor,
                                   style: GoogleFonts.poppins(
@@ -124,9 +140,6 @@ class _StaffScreenState extends State<StaffScreen> {
                                     fontWeight: FontWeight.w600,
                                     fontSize: 15.0,
                                   ),
-                                  onChanged: (value) {
-                                    staffProvider.isSearchStaff= true;
-                                  },
                                   decoration: InputDecoration(
                                     contentPadding: const EdgeInsets.all(18.0),
                                     filled: true,
@@ -155,40 +168,129 @@ class _StaffScreenState extends State<StaffScreen> {
                                 ),
                               ),
                               Padding(
+                                padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
+                                child: TextFormField(
+                                  focusNode: cardFocus,
+                                  controller: staffProvider.cardNo,
+                                  cursorColor: kDarkblueColor,
+                                  style: GoogleFonts.poppins(
+                                    color: kDarkblueColor,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 15.0,
+                                  ),
+                                  decoration: InputDecoration(
+                                    contentPadding: const EdgeInsets.all(18.0),
+                                    filled: true,
+                                    fillColor:  kGinColor,
+                                    prefixIcon: Icon(
+                                      Icons.perm_contact_cal_sharp,
+                                      size: 24.0,
+                                      color: kDarkblueColor,
+                                    ),
+                                    hintText: 'Card Number',
+                                    // labelText: 'Search',
+                                    hintStyle: GoogleFonts.poppins(
+                                      color: kDarkblueColor,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 15.0,
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      borderSide: BorderSide(color: kGinColor),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      borderSide: BorderSide(color: kDarkblueColor),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 10.0),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () async{
+                                      FocusScope.of(context).unfocus();
+                                      final staff = context.read<StaffProvider>();
+                                      await staff.searchStaff(
+                                        companyID,
+                                        staffProvider.staffCodeClass.text,
+                                        staffProvider.cardNo.text,
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: kDarkblueColor,
+                                        side: BorderSide.none,
+                                        shape: const RoundedRectangleBorder()),
+                                    child: Text("Search",
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15.0,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 20),
+                                  ElevatedButton(
+                                    onPressed: () async{
+                                      companyFocus.unfocus();
+                                      staffFocus.unfocus();
+                                      cardFocus.unfocus();
+
+                                      staffProvider.staffCodeClass.clear();
+                                      staffProvider.company.clear();
+                                      staffProvider.cardNo.clear();
+
+                                      staffProvider.isSearchResult = false;
+                                      staffProvider.getAllStaffList('', '');
+
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: kDarkblueColor,
+                                        side: BorderSide.none,
+                                        shape: const RoundedRectangleBorder()),
+                                    child: Text("Clear",
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15.0,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20),
+                              Padding(
                                     padding: const EdgeInsets.only(left: 5.0, right: 5.0, bottom: 15.0, top: 0.0),
                                     child: SizedBox(
                                         width: (MediaQuery.of(context).size.width),
                                         height: (MediaQuery.of(context).size.height * 0.75),
-                                        child:  FutureBuilder(
-                                          future: staffProvider.isSearchStaff? staffProvider.searchStaff(companyID, staffProvider.staffCodeClass.text): staffProvider.getAllStaffList(staffProvider.companyId.text,staffProvider.staffCodeClass.text),
-                                          builder: (context, snapshot) {
-                                            if(snapshot.connectionState == ConnectionState.waiting){
-                                              return const Center(
-                                                child: CircularProgressIndicator(),
-                                              );
-                                            }else if(snapshot.hasError){
-                                              return Center(
-                                                child: Text('Error: ${snapshot.error}'),
-                                              );
-                                            }else{
+                                        child: Consumer<StaffProvider>(
+                                            builder: (context, value, child) {
+                                              if (value.isLoading) {
+                                                return const Center(
+                                                  child: CircularProgressIndicator(),
+                                                );
+                                              }
                                               return Column(
                                                 children: [
                                                   Row(
                                                     children: [
                                                       Padding(
-                                                          padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                                                          child: Consumer<StaffProvider>(
-                                                            builder: (context, value, child) {
-                                                              return Text(
-                                                                "Total Staff : ${staffProvider.isSearchStaff ? staffProvider.staffcount : value.count}",
-                                                                style: GoogleFonts.poppins(
-                                                                  color: kDarkblueColor,
-                                                                  fontSize: 18.0,
-                                                                ),
-                                                              );
-                                                            },
-                                                          ),
-                                                        )
+                                                        padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+                                                        child: Consumer<StaffProvider>(
+                                                          builder: (context, value, child) {
+                                                            return Text(
+                                                              "Total Staff : ${value.isSearchResult ? value.staffcount : value.count}",
+                                                              style: GoogleFonts.poppins(
+                                                                color: kDarkblueColor,
+                                                                fontSize: 18.0,
+                                                              ),
+                                                            );
+                                                          },
+                                                        ),
+                                                      )
                                                     ],
                                                   ),
                                                   const SizedBox(
@@ -201,9 +303,9 @@ class _StaffScreenState extends State<StaffScreen> {
                                                           padding: EdgeInsets.zero,
                                                           controller: _scrollController,
                                                           shrinkWrap: true,
-                                                          itemCount: staffProvider.isSearchStaff? staffProvider.searchList.length: value.staffList.length,
+                                                          itemCount: value.isSearchResult? value.searchList.length: value.staffList.length,
                                                           itemBuilder:(context, index) {
-                                                            final staff= staffProvider.isSearchStaff? staffProvider.searchList[index]:value.staffList[index];
+                                                            final staff= value.isSearchResult? value.searchList[index]:value.staffList[index];
                                                             return Card(
                                                               color: kGinColor2,
                                                               child:  Padding(
@@ -276,10 +378,6 @@ class _StaffScreenState extends State<StaffScreen> {
                                                                                         // maxLines: 4,
                                                                                       ),
                                                                                     ),
-
-                                                                                    //   ],
-                                                                                    // ),
-
                                                                                     const SizedBox(
                                                                                       height: 20,
                                                                                     ),
@@ -347,167 +445,169 @@ class _StaffScreenState extends State<StaffScreen> {
                                                                         right: 4.0,
                                                                         child: SizedBox(
                                                                           child: Consumer<InsertStaffProvider>(
-                                                                              builder: (context, value, child) {
-                                                                                return PopupMenuButton(
-                                                                                  icon: Icon(Icons.more_horiz),
-                                                                                  itemBuilder: (context) {
-                                                                                    return [
-                                                                                      PopupMenuItem(
-                                                                                        value: 'view',
-                                                                                        child: InkWell(
-                                                                                          child: Row(
-                                                                                            children: [
-                                                                                              Icon(Icons.remove_red_eye, size: 20,color: kDarkblueColor,),
-                                                                                              const SizedBox(
-                                                                                                width: 10,
-                                                                                              ),
-                                                                                              Text('View', style: GoogleFonts.poppins(
-                                                                                                color: Colors.black,
-                                                                                                fontWeight: FontWeight.w500,
-                                                                                                fontSize: 17.0,
-                                                                                              )),
-                                                                                            ],
-                                                                                          ),
-                                                                                          onTap: () async{
-                                                                                            staffProvider.staffId= staff.staffId!.toString();
-                                                                                            staffProvider.companyId1= staff.companyId!.toString();
-                                                                                            debugPrint("Staff screen: ${staffProvider.companyId1}");
-                                                                                            await staffProvider.getAddStaffList(staffProvider.staffId);
-                                                                                            if(staffProvider.addStaffList.isNotEmpty){
-                                                                                              final addStaff= staffProvider.addStaffList[0];
-                                                                                              value.firstName.text= addStaff.firstName?? '';
-                                                                                              value.lastName.text= addStaff.lastName?? '';
-                                                                                              value.nric.text= addStaff.nricNumber?? '';
-                                                                                              value.corporateEmail.text= addStaff.corporateEmail?? '';
-                                                                                              value.contactNo.text= addStaff.staffPhone?? '';
-                                                                                              value.jobPosition.text= addStaff.staffJobPosition?? '';
-                                                                                              value.location.text= addStaff.towerId?? '';
-                                                                                              value.addCompany.text= addStaff.company?? '';
-                                                                                              value.unitNo.text= addStaff.unitNumber?? '';
-                                                                                              value.cardNo.text= addStaff.cardNumber?? '';
-                                                                                              value.activationDate.text= addStaff.activationDate?? '';
-
-                                                                                              addStaff.enrollQR == "1"? value.isQR = true : false;
-                                                                                              addStaff.enrollFR == "1"? value.isFR = true : false;
-
-                                                                                              value.isConsent= true;
-                                                                                              Navigator.of(context).pushReplacement(
-                                                                                                MaterialPageRoute(
-                                                                                                  builder: (BuildContext context) => const AddStaff(),
-                                                                                                ),
-                                                                                              );
-
-                                                                                            }
-
-                                                                                            value.view= true;
-                                                                                            value.isUpdate= false;
-                                                                                            value.image1 = true;
-
-                                                                                          },
+                                                                            builder: (context, value, child) {
+                                                                              return PopupMenuButton(
+                                                                                icon: Icon(Icons.more_horiz),
+                                                                                itemBuilder: (context) {
+                                                                                  return [
+                                                                                    PopupMenuItem(
+                                                                                      value: 'view',
+                                                                                      child: InkWell(
+                                                                                        child: Row(
+                                                                                          children: [
+                                                                                            Icon(Icons.remove_red_eye, size: 20,color: kDarkblueColor,),
+                                                                                            const SizedBox(
+                                                                                              width: 10,
+                                                                                            ),
+                                                                                            Text('View', style: GoogleFonts.poppins(
+                                                                                              color: Colors.black,
+                                                                                              fontWeight: FontWeight.w500,
+                                                                                              fontSize: 17.0,
+                                                                                            )),
+                                                                                          ],
                                                                                         ),
+                                                                                        onTap: () async{
+                                                                                          staffProvider.staffId= staff.staffId!.toString();
+                                                                                          // staffProvider.companyId1= staff.companyId!.toString();
+                                                                                          debugPrint("Staff screen: ${staffProvider.companyId1}");
+                                                                                          await staffProvider.getAddStaffList(staffProvider.staffId);
+                                                                                          if(staffProvider.addStaffList.isNotEmpty){
+                                                                                            final addStaff= staffProvider.addStaffList[0];
+                                                                                            value.firstName.text= addStaff.firstName?? '';
+                                                                                            value.lastName.text= addStaff.lastName?? '';
+                                                                                            value.nric.text= addStaff.nricNumber?? '';
+                                                                                            value.corporateEmail.text= addStaff.corporateEmail?? '';
+                                                                                            value.contactNo.text= addStaff.staffPhone?? '';
+                                                                                            value.jobPosition.text= addStaff.staffJobPosition?? '';
+                                                                                            value.location.text= addStaff.tower?? '';
+                                                                                            value.addCompany.text= addStaff.company?? '';
+                                                                                            value.unitNo.text= addStaff.unitNO?? '';
+                                                                                            value.cardNo.text= addStaff.cardNumber?? '';
+                                                                                            value.activationDate.text= addStaff.activationDate?? '';
+
+                                                                                            value.isQR =  addStaff.enrollQR!;
+                                                                                            value.isFR =  addStaff.enrollFR!;
+                                                                                            value.isConsent= addStaff.consentToTC!;
+                                                                                            value.imgString= addStaff.imageData ?? '';
+
+                                                                                            Navigator.of(context).pushReplacement(
+                                                                                              MaterialPageRoute(
+                                                                                                builder: (BuildContext context) => const AddStaff(),
+                                                                                              ),
+                                                                                            );
+
+                                                                                          }
+
+                                                                                          value.view= true;
+                                                                                          value.isUpdate= false;
+                                                                                          value.image1 = true;
+
+                                                                                        },
                                                                                       ),
-                                                                                      PopupMenuItem(
-                                                                                        value: 'edit',
-                                                                                        child: InkWell(
-                                                                                          child: Row(
-                                                                                            children: [
-                                                                                              Icon(Icons.edit, size: 20,color: kDarkblueColor,),
-                                                                                              const SizedBox(
-                                                                                                width: 10,
-                                                                                              ),
-                                                                                              Text('Edit', style: GoogleFonts.poppins(
-                                                                                                color: Colors.black,
-                                                                                                fontWeight: FontWeight.w500,
-                                                                                                fontSize: 17.0,
-                                                                                              )),
-                                                                                            ],
-                                                                                          ),
-                                                                                          onTap: () async{
-                                                                                            staffProvider.staffId= staff.staffId!.toString();
-                                                                                            value.id= staff.staffId!.toString();
-                                                                                            staffProvider.companyId1= staff.companyId!.toString();
-                                                                                            debugPrint("Staff screen: ${staffProvider.companyId1}");
-                                                                                            await staffProvider.getAddStaffList(staffProvider.staffId);
-                                                                                            if(staffProvider.addStaffList.isNotEmpty){
-                                                                                              final addStaff= staffProvider.addStaffList[0];
-                                                                                              value.firstName.text= addStaff.firstName?? '';
-                                                                                              value.lastName.text= addStaff.lastName?? '';
-                                                                                              value.nric.text= addStaff.nricNumber?? '';
-                                                                                              value.corporateEmail.text= addStaff.corporateEmail?? '';
-                                                                                              value.contactNo.text= addStaff.staffPhone?? '';
-                                                                                              value.jobPosition.text= addStaff.staffJobPosition?? '';
-                                                                                              value.location.text= addStaff.towerId?? '';
-                                                                                              value.addCompany.text= addStaff.company?? '';
-                                                                                              value.unitNo.text= addStaff.unitNumber?? '';
-                                                                                              value.cardNo.text= addStaff.cardNumber?? '';
-
-                                                                                              String formattedActivationDate = formatDate(addStaff.activationDate?? '');
-                                                                                              String formattedExpirationDate = formatDate(addStaff.expirationDate?? '');
-
-                                                                                              value.activationDate.text= "$formattedActivationDate - $formattedExpirationDate";
-
-                                                                                              addStaff.enrollQR == "1"? value.isQR = true : false;
-                                                                                              addStaff.enrollFR == "1"? value.isFR = true : false;
-
-                                                                                              value.isConsent= true;
-                                                                                              Navigator.of(context).pushReplacement(
-                                                                                                MaterialPageRoute(
-                                                                                                  builder: (BuildContext context) => const AddStaff(),
-                                                                                                ),
-                                                                                              );
-                                                                                            }
-                                                                                            value.isUpdate= true;
-                                                                                          },
+                                                                                    ),
+                                                                                    PopupMenuItem(
+                                                                                      value: 'edit',
+                                                                                      child: InkWell(
+                                                                                        child: Row(
+                                                                                          children: [
+                                                                                            Icon(Icons.edit, size: 20,color: kDarkblueColor,),
+                                                                                            const SizedBox(
+                                                                                              width: 10,
+                                                                                            ),
+                                                                                            Text('Edit', style: GoogleFonts.poppins(
+                                                                                              color: Colors.black,
+                                                                                              fontWeight: FontWeight.w500,
+                                                                                              fontSize: 17.0,
+                                                                                            )),
+                                                                                          ],
                                                                                         ),
+                                                                                        onTap: () async{
+                                                                                          staffProvider.staffId= staff.staffId!.toString();
+                                                                                          value.id= staff.staffId!.toString();
+                                                                                          staffProvider.companyId1= staff.companyId!.toString();
+                                                                                          debugPrint("Staff screen: ${staffProvider.companyId1}");
+                                                                                          await staffProvider.getAddStaffList(staffProvider.staffId);
+                                                                                          if(staffProvider.addStaffList.isNotEmpty){
+                                                                                            final addStaff= staffProvider.addStaffList[0];
+                                                                                            value.firstName.text= addStaff.firstName?? '';
+                                                                                            value.lastName.text= addStaff.lastName?? '';
+                                                                                            value.nric.text= addStaff.nricNumber?? '';
+                                                                                            value.corporateEmail.text= addStaff.corporateEmail?? '';
+                                                                                            value.contactNo.text= addStaff.staffPhone?? '';
+                                                                                            value.jobPosition.text= addStaff.staffJobPosition?? '';
+                                                                                            value.location.text= addStaff.tower?? '';
+                                                                                            value.addCompany.text= addStaff.company?? '';
+                                                                                            value.unitNo.text= addStaff.unitNO?? '';
+                                                                                            value.cardNo.text= addStaff.cardNumber?? '';
+
+                                                                                            String formattedActivationDate = formatDate(addStaff.activationDate?? '');
+                                                                                            String formattedExpirationDate = formatDate(addStaff.expirationDate?? '');
+
+                                                                                            value.activationDate.text= "$formattedActivationDate - $formattedExpirationDate";
+
+                                                                                            value.isQR =  addStaff.enrollQR!;
+                                                                                            value.isFR =  addStaff.enrollFR!;
+                                                                                            value.isConsent= addStaff.consentToTC!;
+                                                                                            value.imgString= addStaff.imageData ?? '';
+
+                                                                                            Navigator.of(context).pushReplacement(
+                                                                                              MaterialPageRoute(
+                                                                                                builder: (BuildContext context) => const AddStaff(),
+                                                                                              ),
+                                                                                            );
+                                                                                          }
+                                                                                          value.isUpdate= true;
+                                                                                        },
                                                                                       ),
-                                                                                      PopupMenuItem(
-                                                                                        value: 'delete',
-                                                                                        child: InkWell(
-                                                                                          child: Row(
-                                                                                            children: [
-                                                                                              Icon(Icons.delete, size: 20,color: kDarkblueColor,),
-                                                                                              const SizedBox(
-                                                                                                width: 10,
-                                                                                              ),
-                                                                                              Text('Delete', style: GoogleFonts.poppins(
-                                                                                                color: Colors.black,
-                                                                                                fontWeight: FontWeight.w500,
-                                                                                                fontSize: 17.0,
-                                                                                              )),
-                                                                                            ],
-                                                                                          ),
-                                                                                          onTap: () async {
-                                                                                            staffProvider.staffId= staff.staffId!.toString();
-                                                                                            await staffProvider.deleteStaff(staffProvider.staffId);
-                                                                                            Navigator.pop(context);
-                                                                                          },
+                                                                                    ),
+                                                                                    PopupMenuItem(
+                                                                                      value: 'delete',
+                                                                                      child: InkWell(
+                                                                                        child: Row(
+                                                                                          children: [
+                                                                                            Icon(Icons.delete, size: 20,color: kDarkblueColor,),
+                                                                                            const SizedBox(
+                                                                                              width: 10,
+                                                                                            ),
+                                                                                            Text('Delete', style: GoogleFonts.poppins(
+                                                                                              color: Colors.black,
+                                                                                              fontWeight: FontWeight.w500,
+                                                                                              fontSize: 17.0,
+                                                                                            )),
+                                                                                          ],
                                                                                         ),
-                                                                                      )
-                                                                                    ];
-                                                                                  },
+                                                                                        onTap: () async {
+                                                                                          UserPreference user= UserPreference();
+                                                                                          String userID= await user.getUserId();
+                                                                                          staffProvider.staffId= staff.staffId!.toString();
+                                                                                          await staffProvider.deleteStaff(staffProvider.staffId,userID);
+                                                                                          Navigator.pop(context);
+                                                                                        },
+                                                                                      ),
+                                                                                    )
+                                                                                  ];
+                                                                                },
 
-                                                                                );
-                                                                              },
+                                                                              );
+                                                                            },
                                                                           ),
                                                                         )
                                                                     ),
                                                                     Positioned(
                                                                         bottom: 2.0,
                                                                         right: 8.0,
-                                                                        child: Container(
-                                                                          child: Row(
-                                                                            children: [
-                                                                              if(staff.imageData!=null)
-                                                                                Image.asset("assets/images/FR.ico",width: 39,height: 40, )
-                                                                              else
-                                                                                Image.asset("assets/images/FR1.ico",width: 35,height: 40,),
-                                                                              //
-                                                                              // if(staff.qrcode== "true")
-                                                                              //   Image.asset("assets/images/qr2.ico",width: 33,height: 40,)
-                                                                              // else
-                                                                                Image.asset("assets/images/qr.ico",width: 35,height: 40,)
-                                                                            ],
-                                                                          ),
+                                                                        child: Row(
+                                                                          children: [
+                                                                            if(staff.imageData!=null)
+                                                                              Image.asset("assets/images/FR.ico",width: 39,height: 40, )
+                                                                            else
+                                                                              Image.asset("assets/images/FR1.ico",width: 35,height: 40,),
+                                                                            //
+                                                                            // if(staff.qrcode== "true")
+                                                                            //   Image.asset("assets/images/qr2.ico",width: 33,height: 40,)
+                                                                            // else
+                                                                            Image.asset("assets/images/qr.ico",width: 35,height: 40,)
+                                                                          ],
                                                                         )
                                                                     )
                                                                   ],
@@ -523,15 +623,11 @@ class _StaffScreenState extends State<StaffScreen> {
                                                   ),
                                                 ],
                                               );
-                                            }
-
-                                          },
+                                            },
                                         )
 
                                     ),
                                   )
-
-
                             ],
                           ),
 

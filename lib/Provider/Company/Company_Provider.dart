@@ -6,6 +6,12 @@ import '../../company/companymethods.dart';
 import '../../company/companymodel.dart';
 
 class CompanyProvider extends ChangeNotifier{
+  int totalCompanyList= 0;
+  bool isLoadingList = false;
+  bool isSearching = false;
+  bool isDeleting = false;
+
+
   TextEditingController companyCodeClass = TextEditingController();
   TextEditingController towerCodeClass = TextEditingController();
   TextEditingController unitNoClass = TextEditingController();
@@ -14,10 +20,12 @@ class CompanyProvider extends ChangeNotifier{
 
   bool isAdd= false;
   bool addingCompany= false;
-  bool isSearch= false;
+  bool isSearchResult = false;
 
-  late String companyListid;
-  late int viewId;
+
+
+  String companyListId='';
+  int? viewId;
   String companyId1= "";
 
   //All company List
@@ -25,17 +33,17 @@ class CompanyProvider extends ChangeNotifier{
   List<Company> get allCompanyDate => _allCompanyData;
 
   //All viewCompany Data
-  List<Company> _viewCompanyData= [];
-  List<Company> get viewCompanyData => _viewCompanyData;
+  List<CompanyTowerList> _viewCompanyData= [];
+  List<CompanyTowerList> get viewCompanyData => _viewCompanyData;
 
-  late int _count;
+ int _count=0;
   int get count => _count;
 
   //Search
   List<Company> _searchList= [];
   List<Company> get searchList => _searchList;
 
-  late int _companyCount;
+  int _companyCount=0;
   int get companyCount => _companyCount;
 
   @override
@@ -59,40 +67,39 @@ class CompanyProvider extends ChangeNotifier{
 
   //Get Company
   Future<void> getCompany(String? query,String? query2, String? query3) async{
+    isLoadingList = true;
+    notifyListeners();
 
-    // String url= "https://access.apm.sg/restApplicationUser/restCompany/company/list";
-    String url= "http://111.223.92.154:8091/acp_api/companyManagement.php";
-    String completeUrl= url;
-
-
+    String url= "http://111.223.92.154:85/restApplicationUser/restCompany/company/list";
     HttpOverrides.global = MyHttpOverrides();
 
     var response = await http.get(
-      Uri.parse(completeUrl),
+      Uri.parse(url),
       headers: <String, String>{
-        'Content-Type': 'application/x-www-form-urlencoded'
+        "Content-Type": "application/json",
+        "Accept": "application/json",
       },
     );
 
     try{
       if(response.statusCode==200){
         _allCompanyData.clear();
-        var jsonresponse= jsonDecode(response.body);
-        for(var item in jsonresponse){
+        var jsonResponse= jsonDecode(response.body);
+        for(var item in jsonResponse){
           final company= Company.fromJson(item);
           _allCompanyData.add(company);
         }
 
         // Reverse the list of companies
-        _allCompanyData =  _allCompanyData.reversed.toList();
-        _count =  _allCompanyData.where((element) => element.companyName != null && element.companyName!.isNotEmpty).length;
-
+        // _allCompanyData =  _allCompanyData.reversed.toList();
+        _count =  _allCompanyData.where((element) => element.company != null && element.company!.isNotEmpty).length;
+         totalCompanyList= _allCompanyData.length;
         if (query!.isNotEmpty) {
           Set<Company> uniqueCompanies = Set<Company>();
-          for (var item in jsonresponse) {
+          for (var item in jsonResponse) {
             final company = Company.fromJson(item);
 
-            if (company.towerId!.toLowerCase().contains(query.toLowerCase())) {
+            if (company.towers!.toLowerCase().contains(query.toLowerCase())) {
               uniqueCompanies.add(company);
             }
           }
@@ -104,13 +111,13 @@ class CompanyProvider extends ChangeNotifier{
         }
 
         if(query2!.isNotEmpty){
-          _allCompanyData=  _allCompanyData.where((element) => element.companyName!.toLowerCase()
+          _allCompanyData=  _allCompanyData.where((element) => element.company!.toLowerCase()
               .contains(query2.toLowerCase())).toList();
 
         }
 
         if(query3!=null){
-          _allCompanyData=  _allCompanyData.where((element) => element.unitNo!.toLowerCase()
+          _allCompanyData=  _allCompanyData.where((element) => element.unitNoString!.toLowerCase()
               .contains(query3.toLowerCase())).toList();
 
         }
@@ -118,22 +125,23 @@ class CompanyProvider extends ChangeNotifier{
     }catch(e){
       debugPrint(e.toString());
     }
-  notifyListeners();
-
+    isLoadingList = false;
+    notifyListeners();
   }
 
   //View Company List
   Future<void> viewCompanyList(String id) async{
-    String url= "http://111.223.92.154:8091/acp_api/companyManagement.php?comp_id=$id";
-    String completeUrl= url;
-    debugPrint(completeUrl);
+    // String url= "http://111.223.92.154:8091/acp_api/companyManagement.php?comp_id=$id";
+    String url= "http://111.223.92.154:85/restApplicationUser/restCompany/company/getCompanyTowerList/$id";
+    debugPrint(url);
 
     HttpOverrides.global = MyHttpOverrides();
 
     var response = await http.get(
-      Uri.parse(completeUrl),
+      Uri.parse(url),
       headers: <String, String>{
-        'Content-Type': 'application/x-www-form-urlencoded'
+        "Content-Type": "application/json",
+        "Accept": "application/json",
       },
     );
 
@@ -141,9 +149,9 @@ class CompanyProvider extends ChangeNotifier{
       if(response.statusCode==200){
         _viewCompanyData.clear();
         var jsonResponse= jsonDecode(response.body);
-        debugPrint(jsonResponse);
+        debugPrint(jsonResponse.toString());
         for(var item in jsonResponse){
-          final allStaffList= Company.fromJson(item);
+          final allStaffList= CompanyTowerList.fromJson(item);
           _viewCompanyData.add(allStaffList);
         }
       }
@@ -154,55 +162,60 @@ class CompanyProvider extends ChangeNotifier{
   }
 
   //Delete Company
-  Future<bool> deleteCompany(String id) async{
-    String url= "http://111.223.92.154:8091/acp_api/companyManagement.php?comp_id=$id";
-    String completeUrl= url;
+  Future<bool> deleteCompanyById(String id, String userID) async {
+    try {
+      isDeleting = true;
+      notifyListeners();
 
-    HttpOverrides.global = MyHttpOverrides();
+      String url = "http://111.223.92.154:85/restApplicationUser/restCompany/company/deletecompany/$id/$userID";
+      HttpOverrides.global = MyHttpOverrides();
 
-    Map<String, String> jsonData = {
-      "id": id,
-    };
+      var response = await http.get(
+        Uri.parse(url),
+      );
 
-    var response = await http.delete(
-        Uri.parse(completeUrl),
-        body: jsonEncode(jsonData)
-    );
+      debugPrint("Delete company: ${response.statusCode}");
 
-    try{
-      if(response.statusCode==200){
-        var responseBody= jsonDecode(response.body);
-        debugPrint('Response: $responseBody');
+      if (response.statusCode == 200) {
+        var responseBody = jsonDecode(response.body);
+        debugPrint('Response: ${responseBody.toString()}');
+        await getCompany("", '', '');
         notifyListeners();
+        return true;
       }
-      return true;
-    }catch(e){
+    } catch (e) {
       debugPrint(e.toString());
-      return false;
+    }finally {
+      isDeleting = false;
+      notifyListeners();
     }
+
+    return false;
   }
 
   //Search Company
-  Future<bool> searchCompany(List<int> companyId, List<int> towerId,String unitNo) async{
-    String url= "http://111.223.92.154:8091/acp_api/companyManagementSearch.php";
-    String completeUrl= url;
-
+  Future<bool> searchCompany(List<int> towerId, List<int> companyId,String unitNo) async{
+    String url= "http://111.223.92.154:85/restApplicationUser/restCompany/company/filterCompany";
     HttpOverrides.global = MyHttpOverrides();
 
     Map<String,  dynamic> jsonData= {
-      "company_name": companyId,
       "tower":  towerId,
-      "unit_no": unitNo
+      "company": companyId,
+      "unit": unitNo
     };
 
     // Convert the map to a JSON string
     String jsonBody = jsonEncode(jsonData);
-    debugPrint(jsonBody);
+    print(jsonBody);
+
+    isSearching = true;
+    notifyListeners();
 
     var response = await http.post(
-        Uri.parse(completeUrl),
+        Uri.parse(url),
         headers: <String, String>{
-          'Accept': 'application/json'
+          "Content-Type": "application/json",
+          "Accept": "application/json",
         },
         body: jsonBody
     );
@@ -210,14 +223,15 @@ class CompanyProvider extends ChangeNotifier{
     try{
       if(response.statusCode==200){
         _searchList.clear();
-        var jsonResponse= jsonDecode(response.body);
-        debugPrint(jsonResponse);
-        for(var item in jsonResponse){
-          final company= Company.fromJson(item);
-          _searchList.add(company);
-        }
-        _companyCount = _searchList.where((element) => element.companyId != null && element.companyId!.isNotEmpty).length;
+        var jsonResponse = jsonDecode(response.body);
+        print(response.body);
+        _searchList = jsonResponse.map<Company>((e) => Company.fromJson(e)).toList();
+        _companyCount = _searchList
+            .where((element) => element.company != null && element.company!.isNotEmpty)
+            .length;
 
+        isSearchResult = true;   // 🔴 IMPORTANT
+        notifyListeners();
         return true;
       }else{
         debugPrint("Error: ${response.statusCode}");
@@ -228,6 +242,9 @@ class CompanyProvider extends ChangeNotifier{
     }catch(e){
       debugPrint(e.toString());
       return false;
+    }finally {
+      isSearching = false;
+      notifyListeners();
     }
   }
 

@@ -26,6 +26,7 @@ class AddStaff extends StatefulWidget {
 
 class _AddStaffState extends State<AddStaff> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final FocusNode towerFocus = FocusNode();
   @override
   Widget build(BuildContext context) {
     final insertStaffProvider= Provider.of<InsertStaffProvider>(context, listen: false);
@@ -59,20 +60,8 @@ class _AddStaffState extends State<AddStaff> {
                           color: Colors.white,
                         ),
                         onPressed: () {
-                          value.view =false;
-                          value.imgString= "";
-                          value.isQR= false;
-                          value.isFR= false;
-                          value.isConsent= false;
-
-                          insertStaffProvider.clearController();
+                          value.clearController();
                           Navigator.pop(context);
-                          // Navigator.of(context).pushReplacement(
-                          //   MaterialPageRoute(
-                          //     builder: (BuildContext context) => const StaffScreen(),
-                          //   ),
-                          // );
-
                         },
                       ),
                     );
@@ -128,7 +117,7 @@ class _AddStaffState extends State<AddStaff> {
                                  ),
                                  RichText(
                                    text: TextSpan(
-                                     text: "Image Guidlines",
+                                     text: "Image Guidelines",
                                      style: GoogleFonts.poppins(
                                        color: kDarkblueColor,
                                        fontWeight: FontWeight.w600,
@@ -162,7 +151,7 @@ class _AddStaffState extends State<AddStaff> {
                               Icons: Icons.person,
                               obsuretext: false,
                               lines: 1,
-                              errorMsg: 'Staff first name requried.',
+                              errorMsg: 'Staff first name required.',
                               hinttext: 'First Name',
                               controller: insertStaffProvider.firstName,
                             )
@@ -262,7 +251,7 @@ class _AddStaffState extends State<AddStaff> {
                               controller: insertStaffProvider.jobPosition,
                             )
                           ),
-                          Tower(controller1: insertStaffProvider.location),
+                          Tower(controller1: insertStaffProvider.location, focusNode: towerFocus,),
                           AllCompany(controller1: insertStaffProvider.addCompany, hint: "Company",),
                           Padding(
                             padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
@@ -304,7 +293,8 @@ class _AddStaffState extends State<AddStaff> {
                                 prefixIcon: IconButton(
                                   icon: Icon(Icons.calendar_month,size: 24.0,color: kDarkblueColor),
                                   onPressed: () {
-                                    dateRange(context, insertStaffProvider.activationDate);
+                                    dateRange(context, insertStaffProvider.activationDate,insertStaffProvider.activeDate, insertStaffProvider.expiryDate);
+
                                   },
                                 ),
                                 hintText: 'Activation & Expiration Date',
@@ -336,8 +326,8 @@ class _AddStaffState extends State<AddStaff> {
                                         activeColor: kDarkblueColor,
                                         value: value.isQR ,
                                         onChanged: (bool value1) {
-                                          value.isQR = value1;
-                                            debugPrint("QR Code: ${value.isQR}");
+                                          value.setQR(value1);
+                                          debugPrint("QR Code: ${value.isQR}");
                                         },
                                       ),
                                       const SizedBox(
@@ -370,7 +360,7 @@ class _AddStaffState extends State<AddStaff> {
                                       activeColor: kDarkblueColor,
                                       value: value.isFR ,
                                       onChanged: (bool value1) {
-                                          value.isFR = value1;
+                                          value.setFR(value1);
                                           debugPrint("Enable FR: ${value.isFR}");
                                       },
                                     ),
@@ -427,7 +417,7 @@ class _AddStaffState extends State<AddStaff> {
                                       activeColor: kDarkblueColor,
                                       value: value.isConsent,
                                       onChanged: (bool value1) {
-                                          value.isConsent = value1;
+                                          value.setConsent(value1);
                                       },
                                     ),
                                     const SizedBox(
@@ -478,11 +468,8 @@ class _AddStaffState extends State<AddStaff> {
                                               debugPrint('done');
                                               // Create
                                               if(value.isUpdate== false && value.view== false){
-                                                debugPrint('done1');
+                                                debugPrint('Add Data');
                                                 if(value.isFR==true && value.isQR==true && value.imgString.isNotEmpty){
-                                                  value.qr = (value.isQR ? "1":null)!;
-                                                  value.fr = (value.isFR ? "1": null)!;
-                                                  value.consent = (value.isConsent ? "1":null)!;
 
                                                   bool success= await insertStaffProvider.addStaff(
                                                       insertStaffProvider.firstName.text,
@@ -493,11 +480,14 @@ class _AddStaffState extends State<AddStaff> {
                                                       insertStaffProvider.jobPosition.text,
                                                       insertStaffProvider.location.text,
                                                       insertStaffProvider.unitNo.text,
-                                                      insertStaffProvider.activationDate.text,
-                                                      value.qr,
-                                                      value.fr,
-                                                      value.consent,
-                                                      value.imgString
+                                                      value.activeDate.text,
+                                                      value.expiryDate.text,
+                                                      value.isQR.toString(),
+                                                      value.isFR.toString() ,
+                                                      value.isConsent.toString(),
+                                                      value.addCompany.text,
+                                                      value.companyId,
+                                                      value.imgString,
                                                   );
                                                   if(success){
                                                     Fluttertoast.showToast(msg: "Data Inserted successfully", textColor: kDarkblueColor,fontSize: 12.0);
@@ -515,12 +505,11 @@ class _AddStaffState extends State<AddStaff> {
                                                   }
 
                                                 }else if(value.isFR==false && value.isQR==true && value.imgString.isEmpty){
-                                                  value.qr = (value.isQR ? "1":null)!;
-                                                  value.fr = (value.isFR ? "1": null)!;
-                                                  value.consent = (value.isConsent ? "1":null)!;
+
                                                   debugPrint("isQR in insert: ${value.qr}");
 
                                                   bool success= await insertStaffProvider.addStaff(
+
                                                       insertStaffProvider.firstName.text,
                                                       insertStaffProvider.lastName.text,
                                                       insertStaffProvider.nric.text,
@@ -529,11 +518,14 @@ class _AddStaffState extends State<AddStaff> {
                                                       insertStaffProvider.jobPosition.text,
                                                       insertStaffProvider.location.text,
                                                       insertStaffProvider.unitNo.text,
-                                                      insertStaffProvider.activationDate.text,
-                                                      value.qr,
-                                                      value.fr,
-                                                      value.consent,
-                                                      value.imgString
+                                                      value.activeDate.text,
+                                                      value.expiryDate.text,
+                                                      value.isQR.toString(),
+                                                      value.isFR.toString(),
+                                                      value.isConsent.toString(),
+                                                      value.addCompany.text,
+                                                      value.companyId,
+                                                    value.imgString,
                                                   );
 
                                                   if(success){
@@ -563,9 +555,6 @@ class _AddStaffState extends State<AddStaff> {
                                                 if(value.isFR==false){
                                                   debugPrint("Update");
                                                   value.imgString= "";
-                                                  value.qr = value.isQR ? "1":"0";
-                                                  value.fr = value.isFR ? "1":"0";
-                                                  value.consent = value.isConsent ? "1":"0";
 
                                                   bool update= await insertStaffProvider.updateStaff(
                                                       value.id,
@@ -579,9 +568,9 @@ class _AddStaffState extends State<AddStaff> {
                                                       insertStaffProvider.location.text,
                                                       insertStaffProvider.unitNo.text,
                                                       insertStaffProvider.activationDate.text,
-                                                      value.qr,
-                                                      value.fr,
-                                                      value.consent,
+                                                      value.isQR,
+                                                      value.isFR ,
+                                                      value.isConsent,
                                                       value.imgString
                                                   );
 
@@ -601,9 +590,6 @@ class _AddStaffState extends State<AddStaff> {
                                                   }
 
                                                 }else  if(value.isFR==true && value.imgString.isNotEmpty){
-                                                  value.qr = value.isQR ? "1":"0";
-                                                  value.fr = value.isFR ? "1":"0";
-                                                  value.consent = value.isConsent ? "1":"0";
 
                                                   bool update= await insertStaffProvider.updateStaff(
                                                       value.id,
@@ -617,9 +603,9 @@ class _AddStaffState extends State<AddStaff> {
                                                       insertStaffProvider.location.text,
                                                       insertStaffProvider.unitNo.text,
                                                       insertStaffProvider.activationDate.text,
-                                                      value.qr,
-                                                      value.fr,
-                                                      value.consent,
+                                                      value.isQR,
+                                                      value.isFR ,
+                                                      value.isConsent,
                                                       value.imgString
                                                   );
 

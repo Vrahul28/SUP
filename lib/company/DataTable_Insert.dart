@@ -1,3 +1,4 @@
+import 'package:acp/company/companymethods.dart';
 import 'package:acp/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,7 @@ import '../Provider/Company/Insert_Company_Provider.dart';
 
 
 class DatatableInsert extends StatefulWidget {
+  final int? towerID;
   final int length;
   final List<String> towers;
   final List<String> floors;
@@ -15,6 +17,7 @@ class DatatableInsert extends StatefulWidget {
   final List<String> occupancies;
   final List<String> staffNos;
   const DatatableInsert({
+    this.towerID,
     required this.length,
     required this.towers,
     required this.floors,
@@ -107,7 +110,6 @@ class _DatatableInsertState extends State<DatatableInsert> {
                                     PopupMenuItem(
                                       value: 'delete',
                                       child: InkWell(
-
                                         child: Row(
                                           children: [
                                             Icon(Icons.delete, size: 20,color: kDarkblueColor,),
@@ -122,6 +124,7 @@ class _DatatableInsertState extends State<DatatableInsert> {
                                           ],
                                         ),
                                         onTap: () {
+                                          Provider.of<DatatableProvider>(context, listen: false).deleteCompanyDataWithApi(index);
                                           Provider.of<DatatableProvider>(context, listen: false).deleteCompanyData(index);
                                           Navigator.pop(context);
                                         },

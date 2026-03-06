@@ -275,13 +275,13 @@ class _CompanyListState extends State<CompanyList> {
           suggestionsCallback: (pattern) async {
             return  allcompanydata1.
             where((companylist) =>
-            (companylist.companyName?.toLowerCase().contains(pattern.toLowerCase()) ?? false)
+            (companylist.company?.toLowerCase().contains(pattern.toLowerCase()) ?? false)
             ).toList();
           },
           itemBuilder: (context, Company? suggestion) {
             final companyLists = suggestion!;
             return ListTile(
-              title: Text(companyLists.companyName ?? '', style: GoogleFonts.poppins(
+              title: Text(companyLists.company ?? '', style: GoogleFonts.poppins(
                 color: kbluelightColor,
                 fontWeight: FontWeight.w600,
                 fontSize: 15.0,
@@ -304,10 +304,10 @@ class _CompanyListState extends State<CompanyList> {
           onSelected: (Company? suggestion){
             var Companyid;
             if (suggestion != null) {
-              Companyid = suggestion.companyId?? '';
+              Companyid = suggestion.companyID?? '';
               debugPrint(Companyid.toString());
               staff.companyId.text = Companyid.toString();
-              widget.controller1.text = suggestion.companyName?? '';
+              widget.controller1.text = suggestion.company?? '';
             }
             // contractidController.text= suggestion?.contract_type_id ?? '';
             // contract_id= contractidController.text;

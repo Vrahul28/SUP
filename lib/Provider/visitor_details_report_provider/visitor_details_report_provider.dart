@@ -14,6 +14,9 @@ class VisitorDetailsReportProvider extends ChangeNotifier{
   TextEditingController visitorName= TextEditingController();
   TextEditingController dateTimeRange= TextEditingController();
   TextEditingController selectType= TextEditingController();
+  TextEditingController activeDate= TextEditingController();
+  TextEditingController expiryDate= TextEditingController();
+
 
   void clearController(){
     companyName.clear();

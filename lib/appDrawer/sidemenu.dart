@@ -1,4 +1,5 @@
 import 'package:acp/company/companyscreen.dart';
+import 'package:acp/login/login.dart';
 import 'package:acp/staff/staffscreen.dart';
 import 'package:acp/utils/colors.dart';
 import 'package:flutter/material.dart';
@@ -102,11 +103,24 @@ class _SideMenuState extends State<SideMenu> {
                 const SizedBox(height: 30,),
                 DrawerItem(
                   name: 'Home',
-                  icon: Icons.logout,
+                  icon: Icons.home,
                   onPressed: () {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                         builder: (BuildContext context) => MainDashboard(),
+                      ),
+                    );
+
+                  },
+                ),
+                const SizedBox(height: 30,),
+                DrawerItem(
+                  name: 'Logout',
+                  icon: Icons.logout,
+                  onPressed: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => Login(),
                       ),
                     );
 

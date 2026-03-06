@@ -6,8 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../company/companymethods.dart';
 
 class InsertCompanyProvider extends ChangeNotifier{
-  late int id1;
+  int id1=0;
   late int id2;
+
+  int towerID= 0;
 
   List<String> towers= [];
   List<String> floors= [];
@@ -75,44 +77,53 @@ class InsertCompanyProvider extends ChangeNotifier{
       bool suntechReit
       ) async{
 
-    String url= "http://111.223.92.154:8091/acp_api/companyManagement.php";
-    String completeUrl= url;
+    // String url= "http://111.223.92.154:8091/acp_api/companyManagement.php";
+    String url= "http://111.223.92.154:85/restApplicationUser/restCompany/company/addoreditcompany";
 
     SharedPreferences pref= await SharedPreferences.getInstance();
 
     HttpOverrides.global = MyHttpOverrides();
 
+    /// Build companyTowerData dynamically
+    List<Map<String, dynamic>> companyTowerData = [];
+
+    for (int i = 0; i < towerArray.length; i++) {
+      companyTowerData.add({
+        "tower": towerArray[i],
+        "floor": floorArray[i],
+        "units": [unitnoArray[i]],
+        "areas": [areaArray[i]],
+        "occupancies": [occupancyArray[i]],
+        "noOfStaff": [staffcountArray[i]]
+      });
+    }
+
+    /// Convert list to JSON string
+    String towerDataJson = jsonEncode(companyTowerData);
+
     var response = await http.post(
-        Uri.parse(completeUrl),
-        headers: <String, String>{
-          'Accept': 'application/json'
-        },
-        body: {
-          "company_name": companyName,
-          "kiosk_display_name": displayName,
-          "contact_person": contactPerson,
-          "uag": uag,
-          "contact_no": contactNo,
-          "suntec_reit": suntechReit.toString(),
-          "suntec_property": suntechProperty.toString(),
-          "vendor": vendor.toString(),
-          "vms": vms.toString(),
-          "full_name": pref.getString('full_name'),
-          "user_id": pref.getString('userId'),
-          "userRole":pref.getString('userRole'),
-          "towerArray": jsonEncode(towerArray),
-          "floorArray":  jsonEncode(floorArray),
-          "unitNoArray": jsonEncode(unitnoArray),
-          "areaArray": jsonEncode(areaArray),
-          "occupancyArray": jsonEncode(occupancyArray),
-          "staffCountArray": jsonEncode(staffcountArray),
-        }
+      Uri.parse(url),
+      body: {
+        "company": companyName,
+        "contactNo": contactNo,
+        "uAGS": uag,
+        "kioskDisplayName": displayName,
+        "contactPerson": contactPerson,
+        "companySR": suntechReit.toString(),
+        "companySP": suntechProperty.toString(),
+        "companyVendor": vendor.toString(),
+        "showVMS": vms.toString(),
+        "createdBy": pref.getString('userId') ?? "",
+        "companyTowerData": towerDataJson
+      },
     );
+
+    debugPrint("Status Code: ${response.statusCode}");
 
     try{
       if(response.statusCode==200){
         var responseBody= jsonDecode(response.body);
-        debugPrint(responseBody['message']);
+        debugPrint("Add Company API: $responseBody");
       }
       return true;
     }catch(e){
@@ -125,75 +136,81 @@ class InsertCompanyProvider extends ChangeNotifier{
 
   //Update Company
   Future<bool> updateCompany(
-      String id,
-      companyname,
-      displayname,
+      String companyId,
+      String companyName,
+      displayName,
       uag,
-      contactperson,
-      contactno,
-      List towerarray,
-      List floorarray,
-      List unitnoarray,
-      List areaarray,
-      List occupancyarray,
-      List staffcountarray,
+      contactPerson,
+      contactNo,
+      List<String> towerArray,
+      List<String> floorArray,
+      List<String> unitnoArray,
+      List<String> areaArray,
+      List<String> occupancyArray,
+      List<String> staffcountArray,
       bool vms,
-      bool suntecProperty,
+      bool suntechProperty,
       bool vendor,
-      bool suntecReit
+      bool suntechReit
       ) async{
-    String url= "http://111.223.92.154:8091/acp_api/companyManagement.php?comp_id=$id";
-    String completeUrl= url;
+
+    // String url= "http://111.223.92.154:8091/acp_api/companyManagement.php";
+    String url= "http://111.223.92.154:85/restApplicationUser/restCompany/company/addoreditcompany";
+
+    SharedPreferences pref= await SharedPreferences.getInstance();
 
     HttpOverrides.global = MyHttpOverrides();
 
-    debugPrint(towerarray.toString());
+    /// Build companyTowerData dynamically
+    List<Map<String, dynamic>> companyTowerData = [];
 
-    // Create the request body as a Map
-    Map<String, String> body = {
-      "id": id,
-      "company_name": companyname,
-      "kiosk_display_name": displayname,
-      "uag": uag,
-      "contact_person": contactperson,
-      "contact_no": contactno,
-      "suntec_reit": suntecReit.toString(),
-      "suntec_property": suntecProperty.toString(),
-      "vendor": vendor.toString(),
-      "vms": vms.toString(),
-      "full_name": "Admin",
-      "user_id": "23",
-      "userRole": "5",
-      "towerArray": towerarray.toString(), // Pass integer arrays
-      "floorArray": floorarray.toString(),
-      "unitNoArray": unitnoarray.toString(),
-      "areaArray": areaarray.toString(),
-      "occupancyArray": occupancyarray.toString(),
-      "staffCountArray": staffcountarray.toString(),
-    };
+    // for (int i = 0; i < towerArray.length; i++) {
+    //   companyTowerData.add({
+    //     "tower": towerArray[i],
+    //     "floor": floorArray[i],
+    //     "units": [unitnoArray[i]],
+    //     "areas": [areaArray[i]],
+    //     "occupancies": [occupancyArray[i]],
+    //     "noOfStaff": [staffcountArray[i]]
+    //   });
+    // }
 
-    // debugPrint the body to console before making the request
-    debugPrint("Request Body: $body");
+    /// Convert list to JSON string
+    String towerDataJson = jsonEncode(companyTowerData);
 
     var response = await http.post(
-        Uri.parse(completeUrl),
-        headers: <String, String>{
-          'Accept': 'application/json'
-        },
-
-        body: body
+      Uri.parse(url),
+      body: {
+        'companyID':companyId,
+        "company": companyName,
+        "contactNo": contactNo,
+        "uAGS": uag,
+        "kioskDisplayName": displayName,
+        "contactPerson": contactPerson,
+        "companySR": suntechReit.toString(),
+        "companySP": suntechProperty.toString(),
+        "companyVendor": vendor.toString(),
+        "showVMS": vms.toString(),
+        "createdBy": pref.getString('userId') ?? "",
+        "companyTowerData": towerDataJson
+      },
     );
+
+    debugPrint("Status Code: ${response.statusCode}");
 
     try{
       if(response.statusCode==200){
         var responseBody= jsonDecode(response.body);
-        debugPrint(responseBody);
+        debugPrint("Update Company API: $responseBody");
       }
       return true;
-
     }catch(e){
       debugPrint(e.toString());
       return false;
     }
+
   }
+
+
+
 }

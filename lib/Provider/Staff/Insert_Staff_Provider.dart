@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:acp/login/userPreference.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -26,6 +27,8 @@ class InsertStaffProvider extends ChangeNotifier{
   TextEditingController unitNo= TextEditingController();
   TextEditingController cardNo= TextEditingController();
   TextEditingController activationDate= TextEditingController();
+
+  TextEditingController activeDate= TextEditingController();
   TextEditingController expiryDate= TextEditingController();
 
   bool? emailExit;
@@ -42,6 +45,7 @@ class InsertStaffProvider extends ChangeNotifier{
   late String companyId;
 
   String cardNumber= '';
+  String staffNumber= '';
 
   //For Image Picker
   File? image;
@@ -77,65 +81,136 @@ class InsertStaffProvider extends ChangeNotifier{
     unitNo.clear();
     cardNo.clear();
     activationDate.clear();
+    view =false;
+    imgString = '';
+    imageFile = null;
+    image = null;
+    image1 = false;
+
+    isQR = false;
+    isFR = false;
+    isConsent = false;
+    notifyListeners();
   }
 
   void checkEmail() async{
     emailExit = await db.isEmailExists(corporateEmail.text);
   }
 
+  void setFR(bool value) {
+    isFR = value;
+    notifyListeners();
+  }
+
+  void setQR(bool value) {
+    isQR = value;
+    notifyListeners();
+  }
+
+  void setConsent(bool value) {
+    isConsent = value;
+    notifyListeners();
+  }
+
   //Insert Staff
   Future<bool> addStaff(
       String firstname,
-      lastname,
-      nric,
-      corporateemail,
-      staff_phone,
-      jobPosition,
-      tower,
-      unit_no,
-      activation_date,
-      enrollQR,
-      enrollFR,
-      consent,
-      image
+      String lastname,
+      String nric,
+      String corporateEmail,
+      String staff_phone,
+      String jobPosition,
+      String tower,
+      String unit_no,
+      String activation_date,
+      String expiryDate,
+      String enrollQR,
+      String enrollFR,
+      String consent,
+      String company,
+      String companyIDForADD,
+      String image,
       ) async{
-    String url= "http://111.223.92.154:8091/acp_api/staffManagement.php";
-    String completeUrl= url;
 
-    SharedPreferences pref= await SharedPreferences.getInstance();
+    String url= "http://111.223.92.154:85/restApplicationUser/restStaff/staff/addoreditstaff";
+    UserPreference pref= UserPreference();
+
     HttpOverrides.global = MyHttpOverrides();
+    Map<String, String> body = {
+      "firstName": firstname,
+      "lastName": lastname,
+      "staffEmail": corporateEmail,
+      "nricNumber": nric,
+      "corporateEmail": corporateEmail,
+      "staffPhone": staff_phone,
+      "staffJobPosition": jobPosition,
+      "tower": tower,
+      "unitNO": unit_no,
+      "activationDate": activation_date,
+      "expirationDate": expiryDate,
+      "enrollFR": enrollFR,
+      "enrollQR": enrollQR,
+      "consentToTC": consent,
+      "companyId": companyIDForADD,
+      "company": company,
+      "createdBy": await pref.getUserId(),
+      "isP1Upload": "false",
+      "isFrUpload": "false",
+      "isSuntecApiUpload": "false",
+      "uploadReason": "",
+      "remarks": "",
+      "imageName": "",
+      "frImageName": "",
+      "cardNumber": await getCardNumber(),
+      "staffNumber": await getStaffNumber(),
+      "image": image,
+    };
+
+    debugPrint(body.toString());
 
     var response = await http.post(
-        Uri.parse(completeUrl),
+        Uri.parse(url),
         headers: <String, String>{
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Content-Type':'application/x-www-form-urlencoded'
         },
         body: {
-          "first_name": firstname,
-          "last_name": lastname,
-          "nric_number": nric,
-          "corporate_email": corporateemail,
-          "staff_phone": staff_phone,
-          "staff_job_position": jobPosition,
-          "tower_id": tower,
-          "unit_number": unit_no,
-          "activation_and_expiration_date": activation_date,
-          "enroll_FR": enrollFR,
-          "enroll_QR": enrollQR,
-          "consent_to_terms_and_conditions": consent,
-          "staff_email": corporateemail,
-          "image_data": image,
-          "company_id": pref.getString('company_id'),
-          "full_name": pref.getString('full_name'),
-          "user_id": pref.getString('userId'),
-          "userRole":pref.getString('userRole'),
+          "image": image,
+          "firstName": firstname,
+          "lastName": lastname,
+          "staffEmail": corporateEmail,
+          "nricNumber": nric,
+          "corporateEmail": corporateEmail,
+          "staffPhone": staff_phone,
+          "staffJobPosition": jobPosition,
+          "tower": tower,
+          "unitNO": unit_no,
+          "activationDate": activation_date,
+          "expirationDate": expiryDate,
+          "enrollFR": enrollFR,
+          "enrollQR": enrollQR,
+          "consentToTC": consent,
+          "companyId": companyIDForADD,
+          "company": company,
+          "createdBy": await pref.getUserId(),
+          "isP1Upload": "false",
+          "isFrUpload": "false",
+          "isSuntecApiUpload": "false",
+          "uploadReason": "",
+          "remarks": "",
+          "imageName": "",
+          "frImageName": "",
+          "cardNumber": await getCardNumber(),
+          "staffNumber": await getStaffNumber(),
         }
     );
 
     try{
-      if(response.statusCode==200){
+      debugPrint(response.statusCode.toString());
+      debugPrint(image);
+      if(response.statusCode==201){
         var responseBody= jsonDecode(response.body);
-        debugPrint(responseBody['New card number generated']);
+        debugPrint(responseBody['responseMessage']);
       }
       return true;
     }catch(e){
@@ -182,13 +257,11 @@ class InsertStaffProvider extends ChangeNotifier{
         );
         return;
       }
-
-
       imageFile = pickedImage;
-
       imgString = base64Encode(await pickedFile.readAsBytesSync());
       debugPrint('imgstring: $imgString');
-      await saveImage(await pickedFile.readAsBytes());
+      notifyListeners();
+      // await saveImage(await pickedFile.readAsBytes());
 
     } catch (e) {
       // Handle any exception that might occur during image picking
@@ -196,10 +269,13 @@ class InsertStaffProvider extends ChangeNotifier{
     }
   }
 
-  Future<String> saveImage(Uint8List bytes) async{
-    await [Permission.storage].request();
-    final result= await ImageGallerySaverPlus.saveImage(bytes);
-    return result['filepath'];
+  Future<String?> saveImage(Uint8List bytes) async {
+    await Permission.storage.request();
+    final result = await ImageGallerySaverPlus.saveImage(bytes);
+    if (result != null && result['filepath'] != null) {
+      return result['filepath'].toString();
+    }
+    return null;
   }
 
 
@@ -304,8 +380,7 @@ class InsertStaffProvider extends ChangeNotifier{
 
 
   //Get Card Number
-  Future<void> getAllStaffList(String? query, String? query2) async{
-
+  Future<String> getCardNumber() async{
     String url= "http://111.223.92.154:85/restApplicationUser/restCard/cardConfig/getUniqueStaffCardNumber";
     String completeUrl= url;
 
@@ -322,10 +397,63 @@ class InsertStaffProvider extends ChangeNotifier{
       var jsonResponse= jsonDecode(response.body);
       cardNumber= jsonResponse;
       debugPrint(cardNumber);
+      return cardNumber;
     }catch(e){
       debugPrint(e.toString());
     }
     notifyListeners();
+    return "";
+  }
+
+  //Get Staff Number
+  Future<String> getStaffNumber() async{
+    String url= "http://111.223.92.154:85/restApplicationUser/restStaff/staff/uniquestaffnumber";
+    String completeUrl= url;
+
+    HttpOverrides.global = MyHttpOverrides();
+
+    var response = await http.get(
+      Uri.parse(completeUrl),
+      headers: <String, String>{
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+    );
+
+    try{
+      var jsonResponse= jsonDecode(response.body);
+      staffNumber= jsonResponse;
+      debugPrint(staffNumber);
+      return staffNumber;
+    }catch(e){
+      debugPrint(e.toString());
+    }
+    notifyListeners();
+    return "";
+  }
+
+
+  //Get Card Number
+  Future<String> getUnitNo(String company, String tower) async{
+    String url= "http://111.223.92.154:85/restApplicationUser/restCompany/company/getUnitFromCompanyAndTower?company=$company&tower=$tower";
+    String completeUrl= url;
+
+    HttpOverrides.global = MyHttpOverrides();
+
+    var response = await http.get(
+      Uri.parse(completeUrl),
+      headers: <String, String>{
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+    );
+
+    try{
+      var jsonResponse= jsonDecode(response.body);
+      return jsonResponse;
+    }catch(e){
+      debugPrint(e.toString());
+    }
+    notifyListeners();
+    return "";
   }
 
 

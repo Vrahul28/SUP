@@ -5,6 +5,7 @@ import 'package:acp/urls/urls.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../appDashboard/main_dashboard/main_dashboard.dart';
 import '../../company/companymethods.dart';
 import '../../utils/Custom_Snackbar.dart';
 
@@ -51,46 +52,34 @@ class OtpProvider extends ChangeNotifier{
     notifyListeners();
   }
 
-  Future<bool> sendOTP(String email, String userId, String Otp, BuildContext context) async{
+  Future<bool> sendOTP(String Otp,String email, BuildContext context) async{
     String url= Urls.otpAPI;
     String completeUrl= url;
 
     HttpOverrides.global = MyHttpOverrides();
 
+    Map<String,  dynamic> jsonData= {
+      "otp":Otp,
+      "emailId": email
+    };
+
+    // Convert the map to a JSON string
+    String jsonBody = jsonEncode(jsonData);
+    debugPrint(jsonBody);
+
     var response = await http.post(
         Uri.parse(completeUrl),
         headers: <String, String>{
-          'Accept': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: {
-          "email" : email,
-          "user_id" : userId,
-          "otp" : Otp,
-        }
+        body: jsonBody
     );
 
     try{
+      debugPrint(response.statusCode.toString());
+      debugPrint("Response Body: ${response.body}");
       if(response.statusCode==200){
-        var responseBody= jsonDecode(response.body);
-        if(responseBody['status'] == "success"){
-          _fullName= responseBody['full_name'];
-          _userRole= responseBody['userRole'];
-          _username= responseBody['username'];
-          _companyId= responseBody['company_id'];
-
-          pref.setString('full_name', _fullName);
-          pref.setString('userRole', _userRole);
-          pref.setString('username',_username);
-          pref.setString("company_id", _companyId);
-
-          return true;
-        }else{
-          final scaffoldMessengerState = ScaffoldMessenger.of(context);
-          scaffoldMessengerState.showSnackBar(
-              CustomSnackbar(text: "Invalid OTP").getSnackbar()
-          );
-          return false;
-        }
+        return true;
       }
     }catch(e){
       debugPrint(e.toString());

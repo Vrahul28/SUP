@@ -35,7 +35,6 @@ class Location extends StatefulWidget {
 class _LocationState extends State<Location> {
   @override
   Widget build(BuildContext context) {
-    final login= context.read<LoginProvider>();
     return Padding(
       padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
       child: TypeAheadField<Company?>(
@@ -43,6 +42,7 @@ class _LocationState extends State<Location> {
         controller: widget.controller1,
           builder: (context, controller, focusNode) {
             return TextFormField(
+              focusNode: focusNode,
               cursorColor: kDarkblueColor,
               style: GoogleFonts.poppins(
                 color: kDarkblueColor,
@@ -81,13 +81,13 @@ class _LocationState extends State<Location> {
             List<String> predefinedTowers = ['1', '2', '3', '4', '5'];
             return predefinedTowers
                 .where((tower) => tower.toLowerCase().contains(pattern.toLowerCase()))
-                .map((tower) => Company(towerId: tower)) // Convert the list to Company objects
+                .map((tower) => Company(towerString: tower)) // Convert the list to Company objects
                 .toList();
           },
           itemBuilder: (context, Company? suggestion) {
             final towers = suggestion!;
             return ListTile(
-              title: Text(towers.towerId ?? '', style: GoogleFonts.poppins(
+              title: Text(towers.towerString?? '', style: GoogleFonts.poppins(
                 color: kbluelightColor,
                 fontWeight: FontWeight.w600,
                 fontSize: 15.0,
@@ -109,7 +109,7 @@ class _LocationState extends State<Location> {
           ),
           onSelected: (Company? suggestion){
             if (suggestion != null) {
-              widget.controller1.text = suggestion.towerId?? '';
+              widget.controller1.text = suggestion.towerString?? '';
               tower=  widget.controller1.text;
               getTower(tower);
               getFloor(tower);
@@ -171,10 +171,11 @@ class _FloorTextFieldState extends State<FloorTextField> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
-      child: TypeAheadField<Floor?>(
+      child: TypeAheadField<int>(
         hideWithKeyboard: true,
         builder: (context, controller, focusNode) {
           return TextFormField(
+            focusNode: focusNode,
             cursorColor: kDarkblueColor,
             style: GoogleFonts.poppins(
               color: kDarkblueColor,
@@ -210,18 +211,22 @@ class _FloorTextFieldState extends State<FloorTextField> {
           );
         },
         suggestionsCallback: (pattern) async {
-          return floorData
-              .where((floor) => floor.floor!.toLowerCase().contains(pattern.toLowerCase()))
+          List<int> floors = List.generate(44, (index) => index + 1);
+          return floors
+              .where((floor) =>
+              floor.toString().contains(pattern))
               .toList();
         },
-        itemBuilder: (context, Floor? suggestion) {
-          final floors = suggestion!;
+        itemBuilder: (context, int suggestion) {
           return ListTile(
-            title: Text(floors.floor ?? '', style: GoogleFonts.poppins(
-              color: kbluelightColor,
-              fontWeight: FontWeight.w600,
-              fontSize: 15.0,
-            )),
+            title: Text(
+              suggestion.toString(),
+              style: GoogleFonts.poppins(
+                color: kbluelightColor,
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+              ),
+            ),
           );
         },
         emptyBuilder: (context) => SizedBox(
@@ -237,12 +242,10 @@ class _FloorTextFieldState extends State<FloorTextField> {
             ),
           ),
         ),
-        onSelected: (Floor? suggestion){
-          if (suggestion != null) {
-            widget.controller1.text = suggestion.floor?? '';
+        onSelected: (int suggestion){
+            widget.controller1.text = suggestion.toString();
             tower=  widget.controller1.text;
             getTower(tower);
-          }
         },
       ),
     );
@@ -266,9 +269,10 @@ class Uag extends StatefulWidget {
 
 class _UagState extends State<Uag> {
   List<String> selectedTowers = [];
+
+  @override
   void initState() {
     super.initState();
-
     // Set initial value when the widget is first created
     selectedTowers = widget.controller1.text.isNotEmpty
         ? widget.controller1.text.split(', ').where((element) => element.isNotEmpty).toList()
@@ -318,30 +322,7 @@ class _UagState extends State<Uag> {
           enabled: false,
           okButtonLabel: 'OK',
           cancelButtonLabel: 'CANCEL',
-          // hintWidget: Text(
-          //   widget.hint,
-          //   style: GoogleFonts.poppins(
-          //     color: kDarkblueColor,
-          //     fontWeight: FontWeight.w600,
-          //     fontSize: 15.0,
-          //   ),
-          // ),
-
-          // initialValue: (usernameController.text =="ara@gmail.com") ? ['Tower 1','Tower 2','Tower 3','Tower 4','Tower 5'] :
-          // (usernameController.text == "admin@gmail.com") ? [] : (widget.controller1.text.isNotEmpty ? widget.controller1.text.split(', ') : []),
-
           initialValue: selectedTowers,
-
-          // onSaved: (value) {
-          //     if (value == null) return;
-          //     setState(() {
-          //       selectedTowers = ['Tower 1','Tower 2','Tower 3','Tower 4','Tower 5'];
-          //       widget.controller1.text = selectedTowers.join(', ');
-          //     });
-          //     // widget.controller1.text = selectedTowers.join('Tower 1, ');
-          //
-          // },
-
         ),
       )
     );
@@ -438,7 +419,7 @@ class _Uag1State extends State<Uag1> {
   }
 }
 
-void dateRange(BuildContext context, TextEditingController Startdate) async{
+void dateRange(BuildContext context, TextEditingController Startdate, TextEditingController activeDate, TextEditingController expirationDate) async{
 
   DateTime now = DateTime.now();
 
@@ -459,6 +440,9 @@ void dateRange(BuildContext context, TextEditingController Startdate) async{
     String endDate = "${range.end.month}/${range.end.day}/${range.end.year}";
 
     Startdate.text = "$startDate 12:00 AM - $endDate 11:59 PM";
+    activeDate.text = startDate;
+    expirationDate.text= endDate;
+
     debugPrint(Startdate.text);
   }
 

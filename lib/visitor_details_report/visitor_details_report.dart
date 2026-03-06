@@ -108,7 +108,7 @@ class _VisitorDetailsReportState extends State<VisitorDetailsReport> {
                             prefixIcon: IconButton(
                               icon: Icon(Icons.calendar_month,size: 24.0,color: kDarkblueColor),
                               onPressed: () {
-                                dateRange(context, searchVisitor.dateTimeRange);
+                                dateRange(context, searchVisitor.dateTimeRange,searchVisitor.activeDate, searchVisitor.expiryDate);
                               },
                             ),
                             hintText: 'Activation & Expiration Date',

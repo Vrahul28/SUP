@@ -22,6 +22,7 @@ class AddCompany extends StatefulWidget {
 
 class _AddCompanyState extends State<AddCompany> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     final companyPro= context.read<CompanyProvider>();
@@ -56,11 +57,7 @@ class _AddCompanyState extends State<AddCompany> {
                     ),
                     onPressed: () {
                       Navigator.pop(context);
-                      // Navigator.of(context).pushReplacement(
-                      //   MaterialPageRoute(
-                      //     builder: (BuildContext context) => const CompanyScreen(),
-                      //   ),
-                      // );
+                      Provider.of<DatatableProvider>(context, listen: false).clearData();
                       companyPro.isAdd= false;
 
                       company.viewCompany=false;
@@ -75,6 +72,7 @@ class _AddCompanyState extends State<AddCompany> {
                         company.isSwitchOn3 = false;
                         company.isSwitchOn4 = false;
                       });
+
                       companyPro.isAdd=false;
                       company.viewCompany = false;
                       company.isUpdateCompany= false;
@@ -225,10 +223,9 @@ class _AddCompanyState extends State<AddCompany> {
                                   )
                                 ],
                               ),
-
                             if(company.viewCompany==true)
                               Location(controller1: company.towerCompany, hint: "Tower",),
-                           FloorTextField(controller1: company.floor, hint: 'Floor'),
+                             FloorTextField(controller1: company.floor, hint: 'Floor'),
                             Padding(
                               padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
                               child: TextFormField(
@@ -477,38 +474,38 @@ class _AddCompanyState extends State<AddCompany> {
                                 ],
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
-                              child: Row(
-                                children: [
-                                  CupertinoSwitch(
-                                    trackColor: Colors.white,
-                                    activeColor: kDarkblueColor,
-                                    value: company.isSwitchOn4,
-                                    onChanged: (bool value) {
-                                      setState(() {
-                                        company.isSwitchOn4 = value;
-                                      });
-                                    },
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  Expanded(
-                                    child: RichText(
-                                      text: TextSpan(
-                                        text: "VMS",
-                                        style: GoogleFonts.poppins(
-                                          color: kDarkblueColor,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 15.0,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            // Padding(
+                            //   padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
+                            //   child: Row(
+                            //     children: [
+                            //       CupertinoSwitch(
+                            //         trackColor: Colors.white,
+                            //         activeColor: kDarkblueColor,
+                            //         value: company.isSwitchOn4,
+                            //         onChanged: (bool value) {
+                            //           setState(() {
+                            //             company.isSwitchOn4 = value;
+                            //           });
+                            //         },
+                            //       ),
+                            //       const SizedBox(
+                            //         width: 10,
+                            //       ),
+                            //       Expanded(
+                            //         child: RichText(
+                            //           text: TextSpan(
+                            //             text: "VMS",
+                            //             style: GoogleFonts.poppins(
+                            //               color: kDarkblueColor,
+                            //               fontWeight: FontWeight.w600,
+                            //               fontSize: 15.0,
+                            //             ),
+                            //           ),
+                            //         ),
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
                             const SizedBox(
                               height: 10,
                             ),
@@ -522,25 +519,23 @@ class _AddCompanyState extends State<AddCompany> {
                                    occupancies: value.occupancys,
                                    unitNos: value.unitnos,
                                    staffNos: value.staffnos,
-                                 ) ;
+                                 );
                                }),
                             if(company.viewCompany== true && company.isUpdateCompany == false && companyPro.isAdd== false)
                               const DatatableCompany(),
                             if(company.isUpdateCompany == true && company.viewCompany == false)
-                              Visibility(
-                                visible: company.isUpdateCompany,
-                                  child: Consumer<DatatableProvider>(builder: (context, value, child) {
-                                    return  DatatableInsert(
-                                      length: value.towers.length,
-                                      towers: value.towers,
-                                      floors: value.floors,
-                                      areas: value.areas,
-                                      occupancies: value.occupancys,
-                                      unitNos: value.unitnos,
-                                      staffNos: value.staffnos,
-                                    ) ;
-                                  }),
-                              ),
+                              Consumer<DatatableProvider>(builder: (context, value, child) {
+                                return  DatatableInsert(
+                                  towerID: value.ids.length,
+                                  length: value.towers.length,
+                                  towers: value.towers,
+                                  floors: value.floors,
+                                  areas: value.areas,
+                                  occupancies: value.occupancys,
+                                  unitNos: value.unitnos,
+                                  staffNos: value.staffnos,
+                                ) ;
+                              }),
 
                             const SizedBox(
                               height: 20,

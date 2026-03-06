@@ -16,6 +16,7 @@ class DatatableCompany extends StatefulWidget {
   @override
   State<DatatableCompany> createState() => _DatatableCompanyState();
 }
+
 bool isFirstRow= false;
 late int currentIndex;
 
@@ -32,8 +33,7 @@ class _DatatableCompanyState extends State<DatatableCompany> {
           border: Border.all(color: Colors.black),
         ),
           child: FutureBuilder(
-            future: company.viewCompanyList(company.companyListid),
-            // future: db.getaddCompanydata1(companylistid),
+            future: company.viewCompanyList(company.companyListId),
             builder: (context, snapshot) {
               if(snapshot.connectionState == ConnectionState.waiting){
                 return const Center(
@@ -64,7 +64,6 @@ class _DatatableCompanyState extends State<DatatableCompany> {
                             DataColumn(label: Text('Action')),
                       ],
                         rows: _generateDataRows(value.viewCompanyData),
-
                         dataRowHeight: 80,
                         showBottomBorder: true,
                         headingTextStyle: GoogleFonts.poppins(
@@ -86,103 +85,92 @@ class _DatatableCompanyState extends State<DatatableCompany> {
     );
   }
 
-  List<DataRow> _generateDataRows(List<Company> companyData) {
-    final insertCompany= context.read<InsertCompanyProvider>();
-    List<DataRow> rows = [];
+  List<DataRow> _generateDataRows(List<CompanyTowerList> companyData) {
+    final insertCompany = context.read<InsertCompanyProvider>();
 
-    for (var dataRow in companyData) {
-      List<String>? towers = dataRow.towerId?.split(', ');
-      List<String>? floors = dataRow.floorId?.split(', ');
-      List<String>? units = dataRow.unitNo?.split(', ');
-      List<String>? areas = dataRow.area?.split(', ');
-      List<String>? occupancies = dataRow.occupancy?.split(', ');
-      List<String>? staffNumbers = dataRow.noOfStaff?.split(', ');
+    return List.generate(companyData.length, (index) {
+      final dataRow = companyData[index];
+      return DataRow(
+        cells: [
+          DataCell(Text(dataRow.towerID.toString())),
+          DataCell(Text(dataRow.floorID.toString())),
+          DataCell(Text(dataRow.unitNo?? '')),
+          DataCell(Text(dataRow.area ?? '')),
+          DataCell(Text(dataRow.occupancy ?? '')),
+          DataCell(Text(dataRow.noOfStaff ?? '')),
 
-      // Create a new row for each tower
-      for (int i = 0; i < towers!.length; i++) {
-        rows.add(
-          DataRow(
-            cells: [
-              DataCell(Text(towers[i])),
-              DataCell(Text(i < floors!.length ? floors[i] : '')),
-              DataCell(Text(i < units!.length ? units[i] : '')),
-              DataCell(Text(i < areas!.length ? areas[i] : '')),
-              DataCell(Text(i < occupancies!.length ? occupancies[i] : '')),
-              DataCell(Text(i < staffNumbers!.length ? staffNumbers[i] : '')),
-              if (insertCompany.viewCompany == false)
-                DataCell(
-                  IconButton(
-                    icon: Icon(Icons.more_vert),
-                    onPressed: () {
-                      showMenu(
-                        context: context,
-                        position: RelativeRect.fromLTRB(350.0, 700.0, 0.0, 0.0),
-                        items: [
-                          PopupMenuItem(
-                            value: 'edit',
-                            child: InkWell(
-                              child: Row(
-                                children: [
-                                  Icon(Icons.edit, size: 20, color: kDarkblueColor),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    'Edit',
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 17.0,
-                                    ),
-                                  ),
-                                ],
+          if (insertCompany.viewCompany == false)
+            DataCell(
+              IconButton(
+                icon: const Icon(Icons.more_vert),
+                onPressed: () {
+                  showMenu(
+                    context: context,
+                    position:
+                    const RelativeRect.fromLTRB(350.0, 700.0, 0.0, 0.0),
+                    items: [
+                      PopupMenuItem(
+                        child: InkWell(
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit,
+                                  size: 20, color: kDarkblueColor),
+                              const SizedBox(width: 10),
+                              Text(
+                                'Edit',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 17.0,
+                                ),
                               ),
-                              onTap: () {
-                                insertCompany.isEdited= true;
-                                insertCompany.id1= i;
-
-                                insertCompany.towerCompany.text= towers[i];
-                                insertCompany.floor.text = i < floors.length ? floors[i] : '';
-                                insertCompany.unitNo.text = i < units.length ? units[i] : '';
-                                insertCompany.area.text = i < areas.length ? areas[i] : '';
-                                insertCompany.occupancy.text = i < occupancies.length ? occupancies[i] : '';
-                                insertCompany.staffNo.text = i < staffNumbers.length ? staffNumbers[i] : '';
-
-                                Navigator.pop(context);
-                              },
-                            ),
+                            ],
                           ),
-                          PopupMenuItem(
-                            value: 'delete',
-                            child: InkWell(
-                              child: Row(
-                                children: [
-                                  Icon(Icons.delete, size: 20, color: kDarkblueColor),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    'Delete',
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 17.0,
-                                    ),
-                                  ),
-                                ],
+                          onTap: () {
+                            insertCompany.isEdited = true;
+                            insertCompany.id1 = index;
+
+                            insertCompany.towerCompany.text = dataRow.towerID.toString();
+                            insertCompany.floor.text = dataRow.floorID.toString();
+                            insertCompany.unitNo.text = dataRow.unitNo.toString();
+                            insertCompany.area.text = dataRow.area.toString();
+                            insertCompany.occupancy.text = dataRow.occupancy.toString();
+                            insertCompany.staffNo.text = dataRow.noOfStaff.toString();
+
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                      PopupMenuItem(
+                        child: InkWell(
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete,
+                                  size: 20, color: kDarkblueColor),
+                              const SizedBox(width: 10),
+                              Text(
+                                'Delete',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 17.0,
+                                ),
                               ),
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                            ),
+                            ],
                           ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-            ],
-          ),
-        );
-      }
-    }
-    return rows;
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+        ],
+      );
+    });
   }
 }
 

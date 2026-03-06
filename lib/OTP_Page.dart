@@ -181,23 +181,15 @@ class _OtpPageState extends State<OtpPage> {
                               ),
                             ),
                             onPressed: ()  async{
-                              OTP.userID= login.userId ?? '';
                               OTP.username1= login.usernameController.text;
-                              bool isOTP= await OTP.sendOTP(OTP.username1,OTP.userID, OTP.otp.text,context);
-
+                              bool isOTP= await OTP.sendOTP(OTP.otp.text,OTP.username1,context);
                               if(isOTP){
-                                login.loginTODashboard(context);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(builder: (context) => const MainDashboard()),
                                 );
-                                // Navigator.push(
-                                //   context,
-                                //   MaterialPageRoute(builder: (context) => const Dashboard2()),
-                                // );
-                                OTP.otp.clear();
                               }
-
+                              OTP.otp.clear();
                             },
                           ),
                         ),

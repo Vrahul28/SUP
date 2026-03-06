@@ -1,90 +1,143 @@
 class Company {
-  String? companyId;
-  String? companyName;
-  String? companySp;
-  String? companySr;
-  String? companyVendor;
-  String? contactNo;
+  int? companyID;
+  String? company;
   String? contactPerson;
+  String? contactNo;
+  String? uAG;
   String? kioskDisplayName;
-  String? showVms;
-  String? uag;
-  String? companyTowerId;
-  String? area;
-  String? floorId;
+  String? createdBy;
+  String? createdOn;
+  String? modifiedBy;
+  String? modifiedOn;
+  String? companySR;
+  String? companySP;
+  String? companyVendor;
+  String? showVMS;
+  String? uAGS;
+  String? towers;
+  String? unitsNo;
+  String? areas;
+  String? occupanys;
   String? noOfStaff;
-  String? occupancy;
-  String? towerId;
-  String? towerIds;
-  String? unitNo;
-  String? unitNos;
+  String? towerString;
+  String? unitNoString;
+  String? units;
 
   Company(
-      {this.companyId,
-        this.companyName,
-        this.companySp,
-        this.companySr,
-        this.companyVendor,
-        this.contactNo,
+      {this.companyID,
+        this.company,
         this.contactPerson,
+        this.contactNo,
+        this.uAG,
         this.kioskDisplayName,
-        this.showVms,
-        this.uag,
-        this.companyTowerId,
-        this.area,
-        this.floorId,
+        this.createdBy,
+        this.createdOn,
+        this.modifiedBy,
+        this.modifiedOn,
+        this.companySR,
+        this.companySP,
+        this.companyVendor,
+        this.showVMS,
+        this.uAGS,
+        this.towers,
+        this.unitsNo,
+        this.areas,
+        this.occupanys,
         this.noOfStaff,
-        this.occupancy,
-        this.towerId,
-        this.towerIds,
-        this.unitNo,
-        this.unitNos});
+        this.towerString,
+        this.unitNoString,
+        this.units});
 
   Company.fromJson(Map<String, dynamic> json) {
-    companyId = json['company_id'];
-    companyName = json['company_name'];
-    companySp = json['company_sp'];
-    companySr = json['company_sr'];
-    companyVendor = json['company_vendor'];
-    contactNo = json['contact_no'];
-    contactPerson = json['contact_person'];
-    kioskDisplayName = json['kiosk_display_name'];
-    showVms = json['show_vms'];
-    uag = json['uag'];
-    companyTowerId = json['company_tower_id'];
-    area = json['area'];
-    floorId = json['floor_id'];
-    noOfStaff = json['no_of_staff'];
-    occupancy = json['occupancy'];
-    towerId = json['tower_id'];
-    towerIds= json['tower_ids'];
-    unitNo = json['unit_no'];
-    unitNos = json['unit_nos'];
+    companyID = json['companyID'];
+    company = json['company'];
+    contactPerson = json['contactPerson'];
+    contactNo = json['contactNo'];
+    uAG = json['uAG'];
+    kioskDisplayName = json['kioskDisplayName'];
+    createdBy = json['createdBy'];
+    createdOn = json['createdOn'];
+    modifiedBy = json['modifiedBy'];
+    modifiedOn = json['modifiedOn'];
+    companySR = json['companySR'];
+    companySP = json['companySP'];
+    companyVendor = json['companyVendor'];
+    showVMS = json['showVMS'];
+    uAGS = json['uAGS'];
+    towers = json['towers'];
+    unitsNo = json['unitsNo'];
+    areas = json['areas'];
+    occupanys = json['occupanys'];
+    noOfStaff = json['noOfStaff'];
+    towerString = json['towerString'];
+    unitNoString = json['unitNoString'];
+    units = json['units'];
   }
-
-  get occupancies => null;
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['company_id'] = this.companyId;
-    data['company_name'] = this.companyName;
-    data['company_sp'] = this.companySp;
-    data['company_sr'] = this.companySr;
-    data['company_vendor'] = this.companyVendor;
-    data['contact_no'] = this.contactNo;
-    data['contact_person'] = this.contactPerson;
-    data['kiosk_display_name'] = this.kioskDisplayName;
-    data['show_vms'] = this.showVms;
-    data['uag'] = this.uag;
-    data['company_tower_id'] = this.companyTowerId;
-    data['area'] = this.area;
-    data['floor_id'] = this.floorId;
-    data['no_of_staff'] = this.noOfStaff;
-    data['occupancy'] = this.occupancy;
-    data['tower_id'] = this.towerId;
-    data['tower_ids'] = this.towerIds;
-    data['unit_no'] = this.unitNo;
-    data['unit_nos'] = this.unitNos;
+    data['companyID'] = this.companyID;
+    data['company'] = this.company;
+    data['contactPerson'] = this.contactPerson;
+    data['contactNo'] = this.contactNo;
+    data['uAG'] = this.uAG;
+    data['kioskDisplayName'] = this.kioskDisplayName;
+    data['createdBy'] = this.createdBy;
+    data['createdOn'] = this.createdOn;
+    data['modifiedBy'] = this.modifiedBy;
+    data['modifiedOn'] = this.modifiedOn;
+    data['companySR'] = this.companySR;
+    data['companySP'] = this.companySP;
+    data['companyVendor'] = this.companyVendor;
+    data['showVMS'] = this.showVMS;
+    data['uAGS'] = this.uAGS;
+    data['towers'] = this.towers;
+    data['unitsNo'] = this.unitsNo;
+    data['areas'] = this.areas;
+    data['occupanys'] = this.occupanys;
+    data['noOfStaff'] = this.noOfStaff;
+    data['towerString'] = this.towerString;
+    data['unitNoString'] = this.unitNoString;
+    data['units'] = this.units;
     return data;
+  }
+}
+
+
+class CompanyTowerList {
+  int? id;
+  int? companyID;
+  int? towerID;
+  int? floorID;
+  String? unitNo;
+  String? area;
+  String? occupancy;
+  String? noOfStaff;
+  String? companyName;
+
+  CompanyTowerList({
+    this.id,
+    this.companyID,
+    this.towerID,
+    this.floorID,
+    this.unitNo,
+    this.area,
+    this.occupancy,
+    this.noOfStaff,
+    this.companyName,
+  });
+
+  factory CompanyTowerList.fromJson(Map<String, dynamic> json) {
+    return CompanyTowerList(
+      id: json['iD'],
+      companyID: json['companyID'],
+      towerID: json['towerID'],
+      floorID: json['floorID'],
+      unitNo: json['unitNo'],
+      area: json['area'],
+      occupancy: json['occupancy'],
+      noOfStaff: json['noOfStaff'],
+      companyName: json['companyName'],
+    );
   }
 }

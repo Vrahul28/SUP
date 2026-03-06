@@ -120,7 +120,7 @@ class _LoginState extends State<Login> {
                                       height: 50.0,
                                       minWidth: 150.0,
                                       color: kDarkblueColor,
-                                      child: loginMethod.isLoading?
+                                      child: value.isLoading?
                                       CircularProgressIndicator(
                                         color: Colors.white,
                                       ):
@@ -134,7 +134,7 @@ class _LoginState extends State<Login> {
                                       onPressed: ()  async{
                                         if (_formKey.currentState!.validate()) {
                                           _formKey.currentState!.save();
-                                          await loginMethod.loginAdmin(
+                                          await value.loginAdmin(
                                               value.usernameController.text,
                                               value.passwordController.text,
                                               context

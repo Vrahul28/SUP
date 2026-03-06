@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../../Provider/Company/Company_Provider.dart';
 import '../../Provider/Dashboard/Total_Count_Provider.dart';
 
 
@@ -20,8 +21,27 @@ class Gridlayout2 extends StatefulWidget {
 class _Gridlayout2State extends State<Gridlayout2> {
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchStaffListing();
+    });
+  }
+
+  Future<void> fetchStaffListing() async {
+    final companyProvider = context.read<CompanyProvider>();
+    await companyProvider.getCompany(
+      companyProvider.towerCodeClass.text,
+      companyProvider.companyCodeClass.text,
+      companyProvider.unitNoClass.text,
+    );
+    final staffProvider = context.read<StaffProvider>();
+    await staffProvider.getAllStaffList(staffProvider.companyId.text,staffProvider.staffCodeClass.text);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final companyProvider = Provider.of<TotalCountProvider>(context);
+    final companyProvider = Provider.of<CompanyProvider>(context);
     final staffProvider= Provider.of<StaffProvider>(context);
     return GridView.count(
       padding: const EdgeInsets.symmetric(horizontal: 50),
@@ -45,7 +65,7 @@ class _Gridlayout2State extends State<Gridlayout2> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(companyProvider.count.toString(),
+                    Text(companyProvider.totalCompanyList.toString(),
                       style: GoogleFonts.openSans(
                         textStyle: const TextStyle(
                           color: Colors.white,
@@ -81,7 +101,7 @@ class _Gridlayout2State extends State<Gridlayout2> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(staffProvider.count.toString(),
+                    Text(staffProvider.totalListStaff.toString(),
                       style: GoogleFonts.poppins(
                         textStyle: const TextStyle(
                           color: Colors.white,
