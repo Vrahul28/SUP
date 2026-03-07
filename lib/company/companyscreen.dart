@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../Provider/Company/DataTable_Provider.dart';
 import '../appDashboard/dashboard/dashboard.dart';
 import 'addcompany/addcompany.dart';

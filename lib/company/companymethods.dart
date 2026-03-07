@@ -216,7 +216,7 @@ class _TowerState extends State<Tower> {
     return Padding(
       padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0),
       child: TypeAheadField<Company?>(
-          hideWithKeyboard: true,
+          hideWithKeyboard: false,
           controller: widget.controller1,
           focusNode: widget.focusNode,
           builder: (context, controller, focusNode) {
@@ -359,7 +359,7 @@ class _AllCompanyState extends State<AllCompany> {
     return Padding(
       padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 10.0),
       child: TypeAheadField<Company?>(
-          hideWithKeyboard: true,
+          hideWithKeyboard: false,
           controller:widget.controller1,
           builder: (context, controller, focusNode) {
             return TextFormField(
