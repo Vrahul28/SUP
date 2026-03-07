@@ -5,6 +5,7 @@ import 'package:acp/Provider/Dashboard/Application_dashboard_Provider.dart';
 import 'package:acp/Provider/Login/OTP_Provider.dart';
 import 'package:acp/urls/urls.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../appDashboard/gridlist.dart';
@@ -13,6 +14,7 @@ import '../../company/companymethods.dart';
 import 'package:http/http.dart' as http;
 import '../../login/userPreference.dart';
 import '../../utils/Custom_Snackbar.dart';
+import '../../utils/colors.dart';
 import '../Dashboard/Total_Count_Provider.dart';
 import '../Dashboard/Visitor_Acess_Provider.dart';
 import '../Staff/Staff_Provider.dart';
@@ -90,6 +92,8 @@ class LoginProvider extends ChangeNotifier{
 
         isLoading = false;
         notifyListeners();
+      }else if(response.statusCode==500){
+        Fluttertoast.showToast(msg: "Internal Server Error",textColor: kDarkblueColor,fontSize: 15.0,backgroundColor: Colors.white);
       }
     }catch(e){
       debugPrint("Login error: $e");

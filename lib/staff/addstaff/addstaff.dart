@@ -264,16 +264,18 @@ class _AddStaffState extends State<AddStaff> {
                               controller: insertStaffProvider.unitNo,
                             )
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
-                            child: CustomTextfield(
-                              Icons: Icons.credit_card,
-                              obsuretext: false,
-                              lines: 1,
-                              errorMsg: 'Card No. required.',
-                              hinttext: 'Card No',
-                              controller: insertStaffProvider.cardNo,
-                            )
+                          Visibility(
+                            visible: insertStaffProvider.view,
+                              child: Padding(
+                                  padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
+                                  child: CustomTextfield(
+                                    Icons: Icons.credit_card,
+                                    obsuretext: false,
+                                    lines: 1,
+                                    hinttext: 'Card No',
+                                    controller: insertStaffProvider.cardNo,
+                                  )
+                              ),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
@@ -469,7 +471,7 @@ class _AddStaffState extends State<AddStaff> {
                                               // Create
                                               if(value.isUpdate== false && value.view== false){
                                                 debugPrint('Add Data');
-                                                if(value.isFR==true && value.isQR==true && value.imgString.isNotEmpty){
+                                                if(value.isFR==true && value.isQR==true){
 
                                                   bool success= await insertStaffProvider.addStaff(
                                                       insertStaffProvider.firstName.text,
@@ -487,7 +489,6 @@ class _AddStaffState extends State<AddStaff> {
                                                       value.isConsent.toString(),
                                                       value.addCompany.text,
                                                       value.companyId,
-                                                      value.imgString,
                                                   );
                                                   if(success){
                                                     Fluttertoast.showToast(msg: "Data Inserted successfully", textColor: kDarkblueColor,fontSize: 12.0);
@@ -509,7 +510,6 @@ class _AddStaffState extends State<AddStaff> {
                                                   debugPrint("isQR in insert: ${value.qr}");
 
                                                   bool success= await insertStaffProvider.addStaff(
-
                                                       insertStaffProvider.firstName.text,
                                                       insertStaffProvider.lastName.text,
                                                       insertStaffProvider.nric.text,
@@ -525,7 +525,6 @@ class _AddStaffState extends State<AddStaff> {
                                                       value.isConsent.toString(),
                                                       value.addCompany.text,
                                                       value.companyId,
-                                                    value.imgString,
                                                   );
 
                                                   if(success){

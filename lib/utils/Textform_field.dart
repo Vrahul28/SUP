@@ -8,14 +8,14 @@ class CustomTextfield extends StatelessWidget {
   final String hinttext;
   final Icons;
   final int lines;
-  final String errorMsg;
+  final String? errorMsg;
   final bool obsuretext;
   const CustomTextfield({
     required this.controller,
     required this.hinttext,
     required this.lines,
     this.Icons,
-    required this.errorMsg,
+    this.errorMsg,
     required this.obsuretext,
     super.key
   });

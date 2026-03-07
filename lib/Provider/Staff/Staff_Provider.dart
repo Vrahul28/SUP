@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:acp/login/userPreference.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import '../../company/companymethods.dart';
@@ -56,6 +57,8 @@ class StaffProvider extends ChangeNotifier{
     String url= "http://111.223.92.154:85/restApplicationUser/restStaff/staff/filterStaff";
     HttpOverrides.global = MyHttpOverrides();
 
+    UserPreference user= UserPreference();
+
     // Create a JSON map for the request body
     Map<String, dynamic> jsonData = {
       "tower": [],
@@ -66,7 +69,7 @@ class StaffProvider extends ChangeNotifier{
       "staffId": "",
       "pageNo": "",
       "pageSize": "",
-      "userId": "1935"
+      "userId": await user.getUserId()
     };
 
     // Convert the map to a JSON string

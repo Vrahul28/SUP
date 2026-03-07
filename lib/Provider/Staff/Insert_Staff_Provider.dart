@@ -46,6 +46,7 @@ class InsertStaffProvider extends ChangeNotifier{
 
   String cardNumber= '';
   String staffNumber= '';
+  String imagePathForFR= '';
 
   //For Image Picker
   File? image;
@@ -129,95 +130,80 @@ class InsertStaffProvider extends ChangeNotifier{
       String consent,
       String company,
       String companyIDForADD,
-      String image,
-      ) async{
+      ) async {
 
-    String url= "http://111.223.92.154:85/restApplicationUser/restStaff/staff/addoreditstaff";
-    UserPreference pref= UserPreference();
-
+    String url = "http://111.223.92.154:85/restApplicationUser/restStaff/staff/addoreditstaff";
+    UserPreference pref = UserPreference();
     HttpOverrides.global = MyHttpOverrides();
-    Map<String, String> body = {
-      "firstName": firstname,
-      "lastName": lastname,
-      "staffEmail": corporateEmail,
-      "nricNumber": nric,
-      "corporateEmail": corporateEmail,
-      "staffPhone": staff_phone,
-      "staffJobPosition": jobPosition,
-      "tower": tower,
-      "unitNO": unit_no,
-      "activationDate": activation_date,
-      "expirationDate": expiryDate,
-      "enrollFR": enrollFR,
-      "enrollQR": enrollQR,
-      "consentToTC": consent,
-      "companyId": companyIDForADD,
-      "company": company,
-      "createdBy": await pref.getUserId(),
-      "isP1Upload": "false",
-      "isFrUpload": "false",
-      "isSuntecApiUpload": "false",
-      "uploadReason": "",
-      "remarks": "",
-      "imageName": "",
-      "frImageName": "",
-      "cardNumber": await getCardNumber(),
-      "staffNumber": await getStaffNumber(),
-      "image": image,
-    };
 
-    debugPrint(body.toString());
+    try {
 
-    var response = await http.post(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Accept': 'application/json',
-          'Content-Type':'application/x-www-form-urlencoded'
-        },
-        body: {
-          "image": image,
-          "firstName": firstname,
-          "lastName": lastname,
-          "staffEmail": corporateEmail,
-          "nricNumber": nric,
-          "corporateEmail": corporateEmail,
-          "staffPhone": staff_phone,
-          "staffJobPosition": jobPosition,
-          "tower": tower,
-          "unitNO": unit_no,
-          "activationDate": activation_date,
-          "expirationDate": expiryDate,
-          "enrollFR": enrollFR,
-          "enrollQR": enrollQR,
-          "consentToTC": consent,
-          "companyId": companyIDForADD,
-          "company": company,
-          "createdBy": await pref.getUserId(),
-          "isP1Upload": "false",
-          "isFrUpload": "false",
-          "isSuntecApiUpload": "false",
-          "uploadReason": "",
-          "remarks": "",
-          "imageName": "",
-          "frImageName": "",
-          "cardNumber": await getCardNumber(),
-          "staffNumber": await getStaffNumber(),
-        }
-    );
+      var request = http.MultipartRequest('POST', Uri.parse(url));
+      request.headers.addAll({
+        "Accept": "application/json",
+      });
 
-    try{
-      debugPrint(response.statusCode.toString());
-      debugPrint(image);
-      if(response.statusCode==201){
-        var responseBody= jsonDecode(response.body);
-        debugPrint(responseBody['responseMessage']);
+      request.fields.addAll({
+        "firstName": firstname,
+        "lastName": lastname,
+        "staffEmail": corporateEmail,
+        "nricNumber": nric,
+        "corporateEmail": corporateEmail,
+        "staffPhone": staff_phone,
+        "staffJobPosition": jobPosition,
+        "tower": tower,
+        "unitNO": unit_no,
+        "activationDate": activation_date,
+        "expirationDate": expiryDate,
+        "enrollFR": enrollFR,
+        "enrollQR": enrollQR,
+        "consentToTC": consent,
+        "companyId": companyIDForADD,
+        "company": company,
+        "createdBy": await pref.getUserId(),
+        "isP1Upload": "false",
+        "isFrUpload": "false",
+        "isSuntecApiUpload": "false",
+        "uploadReason": "",
+        "remarks": "",
+        "imageName": "",
+        "frImageName": "",
+        "cardNumber": await getCardNumber(),
+        "staffNumber": await getStaffNumber(),
+      });
+
+      // 👇 Send Base64 string as field
+      if (imageFile != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'image',                // field name expected by API
+            image!.path,
+          ),
+        );
+
+        debugPrint("Uploading Image: ${image!.path}");
       }
-      return true;
-    }catch(e){
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body);
+
+      if (response.statusCode == 201) {
+        var responseBody = jsonDecode(response.body);
+        debugPrint(responseBody['responseMessage']);
+
+        await uploadFiles();
+        await uploadDataToFRTabletByTower(tower, '$firstname $lastname');
+        return true;
+      }
+
+      return false;
+
+    } catch (e) {
       debugPrint(e.toString());
       return false;
     }
-
   }
 
   //Pick Image
@@ -235,13 +221,16 @@ class InsertStaffProvider extends ChangeNotifier{
         return;
       }
 
-      final pickedFile = File(pickedImage.path);
-      var decodedImage = await decodeImageFromList(pickedFile.readAsBytesSync());
+      imageFile = pickedImage;              // XFile
+      image = File(pickedImage.path);
+
+      // final pickedFile = File(pickedImage.path);
+      var decodedImage = await decodeImageFromList(image!.readAsBytesSync());
       debugPrint(decodedImage.width.toString());
       debugPrint(decodedImage.height.toString());
-      debugPrint(getFileSizeString(file: pickedFile));
+      debugPrint(getFileSizeString(file: image!));
 
-      if (pickedFile.lengthSync() > 200 * 1024) {
+      if (image!.lengthSync() > 200 * 1024) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.white,
@@ -257,9 +246,12 @@ class InsertStaffProvider extends ChangeNotifier{
         );
         return;
       }
-      imageFile = pickedImage;
-      imgString = base64Encode(await pickedFile.readAsBytesSync());
-      debugPrint('imgstring: $imgString');
+      // imageFile = pickedImage;
+      // imgString = base64Encode(pickedFile.readAsBytesSync());
+
+      debugPrint("Image Path: ${image!.path}");
+
+      // printFullBase64(imgString);
       notifyListeners();
       // await saveImage(await pickedFile.readAsBytes());
 
@@ -346,34 +338,51 @@ class InsertStaffProvider extends ChangeNotifier{
   }
 
   //Upload Data to FR Tablet
-  Future<bool> uploadFiles(String imageString) async{
-    String url= "http://111.223.92.154:5000/api/FRTablet/UploadFiles";
-    String completeUrl= url;
-
+  Future<bool> uploadFiles() async {
+    String url = "http://111.223.92.154:5000/api/FRTablet/UploadFiles";
     HttpOverrides.global = MyHttpOverrides();
 
-    Map<String, String> body = {
-      "files": imageString,
-    };
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse(url),
+      );
 
-    // Conditionally add enrollFR based on qr value
-    var response = await http.post(
-        Uri.parse(completeUrl),
-        headers: <String, String>{
-          'Accept': 'application/json'
-        },
-        body: body
-    );
+      request.headers.addAll({
+        "Accept": "application/json",
+      });
 
-    try{
-      if(response.statusCode==200){
-        var responseBody= jsonDecode(response.body);
-        debugPrint(responseBody['message']);
-        notifyListeners();
+      // Add image file
+      if (image != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            "files",           // field name expected by API
+            image!.path,
+          ),
+        );
+
+        debugPrint("Uploading Image: ${image!.path}");
       }
-      return true;
-    }catch(e){
-      debugPrint(e.toString());
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        var responseBody = jsonDecode(response.body);
+        debugPrint(responseBody['message']);
+        debugPrint(responseBody['resultData']);
+        imagePathForFR= responseBody['resultData'];
+        notifyListeners();
+        return true;
+      }
+
+      return false;
+
+    } catch (e) {
+      debugPrint("Upload Error: $e");
       return false;
     }
   }
@@ -432,7 +441,7 @@ class InsertStaffProvider extends ChangeNotifier{
   }
 
 
-  //Get Card Number
+  //Get Unit Number
   Future<String> getUnitNo(String company, String tower) async{
     String url= "http://111.223.92.154:85/restApplicationUser/restCompany/company/getUnitFromCompanyAndTower?company=$company&tower=$tower";
     String completeUrl= url;
@@ -472,7 +481,7 @@ class InsertStaffProvider extends ChangeNotifier{
       "imagePath": "string",
       "documnetNumber": "string",
       "name": "string",
-      "cardNumber": "string"
+      "cardNumber": cardNumber
     };
 
     // Conditionally add enrollFR based on qr value
@@ -497,20 +506,32 @@ class InsertStaffProvider extends ChangeNotifier{
     }
   }
 
+  String generateAlphaNumeric() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    Random random = Random();
+
+    return List.generate(
+      10,
+          (index) => chars[random.nextInt(chars.length)],
+    ).join();
+  }
+
   //Upload Data to FR Tablet
-  Future<bool> uploadDataToFRTabletByTower(String imageString) async{
+  Future<bool> uploadDataToFRTabletByTower(String tower, String name) async{
     String url= "http://111.223.92.154:5000/api/FRTablet/uploadDataToFRTableByTower";
     String completeUrl= url;
 
     HttpOverrides.global = MyHttpOverrides();
 
     Map<String, String> body = {
-      "tower": "string",
-      "imagePath": "string",
-      "documnetNumber": "string",
-      "name": "string",
-      "cardNumber": "string"
+      "tower": tower,
+      "imagePath": imagePathForFR,
+      "documnetNumber": generateAlphaNumeric(),
+      "name": name,
+      "cardNumber": cardNumber
     };
+
+    debugPrint(body.toString());
 
     // Conditionally add enrollFR based on qr value
     var response = await http.post(
@@ -518,10 +539,13 @@ class InsertStaffProvider extends ChangeNotifier{
         headers: <String, String>{
           'Accept': 'application/json'
         },
-        body: body
+        body: jsonEncode(body)
     );
 
     try{
+      debugPrint("upload data to fr tablet tower Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.body}");
+
       if(response.statusCode==200){
         var responseBody= jsonDecode(response.body);
         debugPrint(responseBody['message']);

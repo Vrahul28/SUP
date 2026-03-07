@@ -185,6 +185,10 @@ class _CompanyScreenState extends State<CompanyScreen> {
                                       companyFocus.unfocus();
                                       unitNoFocus.unfocus();
 
+                                      towerId.clear();
+                                      companyID.clear();
+                                      companyProvider.unitNoClass.clear();
+
                                       companyProvider.clearController();
                                       companyProvider.isSearchResult = false;
                                       companyProvider.getCompany('', '', '');
