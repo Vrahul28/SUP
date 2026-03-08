@@ -7,6 +7,7 @@ import '../../company/companymethods.dart';
 
 class DatatableProvider extends ChangeNotifier{
 
+  bool add= false;
   List<int> ids = [];
   List<String> towers = [];
   List<String> floors = [];
@@ -18,6 +19,7 @@ class DatatableProvider extends ChangeNotifier{
   // Add data to the lists and notify listeners
   void addCompanyData({
     int? id,
+    bool? isAdd,
     required String tower,
     required String floor,
     required String unitno,
@@ -32,6 +34,7 @@ class DatatableProvider extends ChangeNotifier{
     areas.add(area);
     occupancys.add(occupancy);
     staffnos.add(staffno);
+    add= isAdd ?? false;
 
     notifyListeners(); // Notifies consumers to rebuild
   }
@@ -64,6 +67,7 @@ class DatatableProvider extends ChangeNotifier{
   // Method to delete data at a specific index
   void deleteCompanyData(int index) {
     if (index >= 0 && index < towers.length) {
+      ids.removeAt(index);
       towers.removeAt(index);
       floors.removeAt(index);
       unitnos.removeAt(index);
@@ -71,14 +75,13 @@ class DatatableProvider extends ChangeNotifier{
       occupancys.removeAt(index);
       staffnos.removeAt(index);
 
-      notifyListeners(); // Notifies consumers to rebuild
-    } else {
-      debugPrint("Invalid index: $index");
+      notifyListeners();
     }
   }
 
   // Clear all the lists (if needed)
   void clearData() {
+    ids.clear();
     towers.clear();
     floors.clear();
     unitnos.clear();

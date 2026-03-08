@@ -30,11 +30,7 @@ class _Gridlayout2State extends State<Gridlayout2> {
 
   Future<void> fetchStaffListing() async {
     final companyProvider = context.read<CompanyProvider>();
-    await companyProvider.getCompany(
-      companyProvider.towerCodeClass.text,
-      companyProvider.companyCodeClass.text,
-      companyProvider.unitNoClass.text,
-    );
+    await companyProvider.getCompany();
     final staffProvider = context.read<StaffProvider>();
     await staffProvider.getAllStaffList(staffProvider.companyId.text,staffProvider.staffCodeClass.text);
   }

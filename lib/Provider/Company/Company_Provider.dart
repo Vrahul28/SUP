@@ -66,7 +66,7 @@ class CompanyProvider extends ChangeNotifier{
 
 
   //Get Company
-  Future<void> getCompany(String? query,String? query2, String? query3) async{
+  Future<void> getCompany() async{
     isLoadingList = true;
     notifyListeners();
 
@@ -93,34 +93,8 @@ class CompanyProvider extends ChangeNotifier{
         // Reverse the list of companies
         // _allCompanyData =  _allCompanyData.reversed.toList();
         _count =  _allCompanyData.where((element) => element.company != null && element.company!.isNotEmpty).length;
-         totalCompanyList= _allCompanyData.length;
-        if (query!.isNotEmpty) {
-          Set<Company> uniqueCompanies = Set<Company>();
-          for (var item in jsonResponse) {
-            final company = Company.fromJson(item);
-
-            if (company.towers!.toLowerCase().contains(query.toLowerCase())) {
-              uniqueCompanies.add(company);
-            }
-          }
-
-          _allCompanyData.clear();
-          _allCompanyData.addAll(uniqueCompanies.toList());
-
-          debugPrint(_allCompanyData.length.toString());
-        }
-
-        if(query2!.isNotEmpty){
-          _allCompanyData=  _allCompanyData.where((element) => element.company!.toLowerCase()
-              .contains(query2.toLowerCase())).toList();
-
-        }
-
-        if(query3!=null){
-          _allCompanyData=  _allCompanyData.where((element) => element.unitNoString!.toLowerCase()
-              .contains(query3.toLowerCase())).toList();
-
-        }
+        totalCompanyList= _allCompanyData.length;
+        notifyListeners();
       }
     }catch(e){
       debugPrint(e.toString());
@@ -161,6 +135,42 @@ class CompanyProvider extends ChangeNotifier{
     notifyListeners();
   }
 
+  Future<List<CompanyTowerList>> viewCompanyListForTable(String id) async {
+
+    String url= "http://111.223.92.154:85/restApplicationUser/restCompany/company/getCompanyTowerList/$id";
+    debugPrint(url);
+
+    HttpOverrides.global = MyHttpOverrides();
+
+    var response = await http.get(
+      Uri.parse(url),
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    );
+
+    try{
+      if(response.statusCode==200){
+
+        _viewCompanyData.clear();
+        var jsonResponse = jsonDecode(response.body);
+        for(var item in jsonResponse){
+          final data = CompanyTowerList.fromJson(item);
+          _viewCompanyData.add(data);
+        }
+
+        notifyListeners();
+        return _viewCompanyData;
+      }
+
+    }catch(e){
+      debugPrint(e.toString());
+    }
+
+    return [];
+  }
+
   //Delete Company
   Future<bool> deleteCompanyById(String id, String userID) async {
     try {
@@ -179,7 +189,7 @@ class CompanyProvider extends ChangeNotifier{
       if (response.statusCode == 200) {
         var responseBody = jsonDecode(response.body);
         debugPrint('Response: ${responseBody.toString()}');
-        await getCompany("", '', '');
+        await getCompany();
         notifyListeners();
         return true;
       }
@@ -224,7 +234,7 @@ class CompanyProvider extends ChangeNotifier{
       if(response.statusCode==200){
         _searchList.clear();
         var jsonResponse = jsonDecode(response.body);
-        print(response.body);
+        debugPrint(response.body.toString());
         _searchList = jsonResponse.map<Company>((e) => Company.fromJson(e)).toList();
         _companyCount = _searchList
             .where((element) => element.company != null && element.company!.isNotEmpty)

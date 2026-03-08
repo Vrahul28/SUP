@@ -27,7 +27,6 @@ class _LoginState extends State<Login> {
     passwordVisible = true;
   }
 
-
   @override
   Widget build(BuildContext context) {
     final loginMethod= Provider.of<LoginProvider>(context, listen: false);

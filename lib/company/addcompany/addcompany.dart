@@ -10,6 +10,7 @@ import '../../staff/addstaff/addstaffmethods.dart';
 import '../../utils/Textform_field.dart';
 import '../../utils/colors.dart';
 import '../DataTable_Insert.dart';
+import '../companymodel.dart';
 import '../companyscreen.dart';
 import 'datatablecompany.dart';
 
@@ -22,6 +23,8 @@ class AddCompany extends StatefulWidget {
 
 class _AddCompanyState extends State<AddCompany> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final FocusNode towerFocus = FocusNode();
+  final FocusNode floorFocus = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -138,7 +141,7 @@ class _AddCompanyState extends State<AddCompany> {
                             if(company.viewCompany == false)
                               Stack(
                                 children: [
-                                  Location(controller1: company.towerCompany, hint: "Tower",),
+                                  Location(controller1: company.towerCompany, hint: "Tower",focusNode: towerFocus,),
                                   Positioned(
                                     top: 2.0,
                                       right: 8.0,
@@ -152,6 +155,7 @@ class _AddCompanyState extends State<AddCompany> {
                                               area: company.area.text,
                                               occupancy: company.occupancy.text,
                                               staffno: company.staffNo.text,
+                                              isAdd: true
                                             );
 
                                             company.towerCompany.clear();
@@ -160,6 +164,9 @@ class _AddCompanyState extends State<AddCompany> {
                                             company.area.clear();
                                             company.occupancy.clear();
                                             company.staffNo.clear();
+
+                                            towerFocus.unfocus();
+                                            floorFocus.unfocus();
 
                                           }else if(company.isEdited == true && companyPro.isAdd== false && company.isUpdateCompany == false){
                                             Provider.of<DatatableProvider>(context, listen: false).updateCompanyData(
@@ -172,7 +179,6 @@ class _AddCompanyState extends State<AddCompany> {
                                               staffno: company.staffNo.text,
                                             );
 
-
                                             debugPrint("isedit: ${company.isEdited}");
 
                                             company.towerCompany.clear();
@@ -181,17 +187,49 @@ class _AddCompanyState extends State<AddCompany> {
                                             company.area.clear();
                                             company.occupancy.clear();
                                             company.staffNo.clear();
+                                            towerFocus.unfocus();
+                                            floorFocus.unfocus();
 
                                           }else if(company.isUpdateCompany== true && company.isEdited== true && company.viewCompany == false && companyPro.isAdd == false){
-                                            Provider.of<DatatableProvider>(context, listen: false).updateCompanyData(
-                                              index: company.id1,
-                                              tower: company.towerCompany.text,
-                                              floor: company.floor.text,
-                                              unitno: company.unitNo.text,
-                                              area: company.area.text,
-                                              occupancy: company.occupancy.text,
-                                              staffno: company.staffNo.text,
+                                            bool towerData = await company.editCompanyTowerData(
+                                                int.parse(companyPro.companyId1),
+                                                int.parse(company.floor.text),
+                                                int.parse(company.towerCompany.text),
+                                                company.unitNo.text,
+                                                company.area.text,
+                                                company.occupancy.text,
+                                                company.staffNo.text,
+                                                true,
+                                                company.id1
                                             );
+
+                                            if(towerData){
+                                              List<CompanyTowerList> data = await companyPro.viewCompanyListForTable(companyPro.companyId1);
+                                              final tableProvider = Provider.of<DatatableProvider>(context, listen: false);
+                                              tableProvider.clearData();
+
+                                              for(var item in data){
+                                                tableProvider.addCompanyData(
+                                                  id: item.id,
+                                                  tower: item.towerID.toString(),
+                                                  floor: item.floorID.toString(),
+                                                  unitno: item.unitNo ?? "",
+                                                  area: item.area ?? "",
+                                                  occupancy: item.occupancy ?? "",
+                                                  staffno: item.noOfStaff ?? "",
+                                                );
+                                              }
+                                            }
+
+                                            // Provider.of<DatatableProvider>(context, listen: false).updateCompanyData(
+                                            //   index: company.id1,
+                                            //   tower: company.towerCompany.text,
+                                            //   floor: company.floor.text,
+                                            //   unitno: company.unitNo.text,
+                                            //   area: company.area.text,
+                                            //   occupancy: company.occupancy.text,
+                                            //   staffno: company.staffNo.text,
+                                            // );
 
                                             debugPrint("isUpdateCompany: ${company.isUpdateCompany}");
 
@@ -201,17 +239,59 @@ class _AddCompanyState extends State<AddCompany> {
                                             company.area.clear();
                                             company.occupancy.clear();
                                             company.staffNo.clear();
+                                            towerFocus.unfocus();
+                                            floorFocus.unfocus();
 
                                           }else if(company.isUpdateCompany== true && company.isEdited== false && company.viewCompany == false && companyPro.isAdd == false){
-                                            Provider.of<DatatableProvider>(context, listen: false).updateCompanyData(
-                                              index: company.id1,
-                                              tower: company.towerCompany.text,
-                                              floor: company.floor.text,
-                                              unitno: company.unitNo.text,
-                                              area: company.area.text,
-                                              occupancy: company.occupancy.text,
-                                              staffno: company.staffNo.text,
+                                            bool towerData = await company.editCompanyTowerData(
+                                                int.parse(companyPro.companyId1),
+                                                int.parse(company.floor.text),
+                                                int.parse(company.towerCompany.text),
+                                                company.unitNo.text,
+                                                company.area.text,
+                                                company.occupancy.text,
+                                                company.staffNo.text,
+                                                false,
+                                                0
                                             );
+
+                                            if(towerData){
+                                              List<CompanyTowerList> data = await companyPro.viewCompanyListForTable(companyPro.companyId1);
+                                              final tableProvider = Provider.of<DatatableProvider>(context, listen: false);
+                                              tableProvider.clearData();
+
+                                              for(var item in data){
+                                                tableProvider.addCompanyData(
+                                                  id: item.id,
+                                                  tower: item.towerID.toString(),
+                                                  floor: item.floorID.toString(),
+                                                  unitno: item.unitNo ?? "",
+                                                  area: item.area ?? "",
+                                                  occupancy: item.occupancy ?? "",
+                                                  staffno: item.noOfStaff ?? "",
+                                                );
+                                              }
+                                            }
+
+                                            // Provider.of<DatatableProvider>(context, listen: false).updateCompanyData(
+                                            //   index: company.id1,
+                                            //   tower: company.towerCompany.text,
+                                            //   floor: company.floor.text,
+                                            //   unitno: company.unitNo.text,
+                                            //   area: company.area.text,
+                                            //   occupancy: company.occupancy.text,
+                                            //   staffno: company.staffNo.text,
+                                            // );
+
+                                            company.towerCompany.clear();
+                                            company.floor.clear();
+                                            company.unitNo.clear();
+                                            company.area.clear();
+                                            company.occupancy.clear();
+                                            company.staffNo.clear();
+
+                                            towerFocus.unfocus();
+                                            floorFocus.unfocus();
                                           }
                                         },
                                         icon: Icon(
@@ -224,8 +304,8 @@ class _AddCompanyState extends State<AddCompany> {
                                 ],
                               ),
                             if(company.viewCompany==true)
-                              Location(controller1: company.towerCompany, hint: "Tower",),
-                             FloorTextField(controller1: company.floor, hint: 'Floor'),
+                              Location(controller1: company.towerCompany, hint: "Tower",focusNode: towerFocus,),
+                            FloorTextField(controller1: company.floor, hint: 'Floor',focusNode: floorFocus,),
                             Padding(
                               padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
                               child: TextFormField(
@@ -519,6 +599,7 @@ class _AddCompanyState extends State<AddCompany> {
                                    occupancies: value.occupancys,
                                    unitNos: value.unitnos,
                                    staffNos: value.staffnos,
+                                   isUpdate: false,
                                  );
                                }),
                             if(company.viewCompany== true && company.isUpdateCompany == false && companyPro.isAdd== false)
@@ -534,9 +615,9 @@ class _AddCompanyState extends State<AddCompany> {
                                   occupancies: value.occupancys,
                                   unitNos: value.unitnos,
                                   staffNos: value.staffnos,
+                                  isUpdate: true,
                                 ) ;
                               }),
-
                             const SizedBox(
                               height: 20,
                             ),
@@ -683,7 +764,11 @@ class _AddCompanyState extends State<AddCompany> {
                                         backgroundColor: kDarkblueColor,
                                         side: BorderSide.none,
                                         shape: const StadiumBorder()),
-                                    child: Text("Submit",
+                                    child: company.isLoading
+                                        ? const CircularProgressIndicator(
+                                          color: Colors.white,
+                                        ) :
+                                    Text("Submit",
                                       style: GoogleFonts.poppins(
                                         color: Colors.white,
                                         fontWeight: FontWeight.w600,

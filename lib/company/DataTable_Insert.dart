@@ -16,6 +16,7 @@ class DatatableInsert extends StatefulWidget {
   final List<String> areas;
   final List<String> occupancies;
   final List<String> staffNos;
+  final bool? isUpdate;
   const DatatableInsert({
     this.towerID,
     required this.length,
@@ -25,6 +26,7 @@ class DatatableInsert extends StatefulWidget {
     required this.areas,
     required this.occupancies,
     required this.staffNos,
+    this.isUpdate,
     super.key});
 
   @override
@@ -60,15 +62,15 @@ class _DatatableInsertState extends State<DatatableInsert> {
                   DataColumn(label: Text('Actions')),
                 ],
                 rows: List.generate(
-                  widget.length,
+                  provider.towers.length,
                       (index) => DataRow(
                     cells: [
-                      DataCell(Text(widget.towers[index])),
-                      DataCell(Text(widget.floors[index])),
-                      DataCell(Text(widget.unitNos[index])),
-                      DataCell(Text(widget.areas[index])),
-                      DataCell(Text(widget.occupancies[index])),
-                      DataCell(Text(widget.staffNos[index])),
+                      DataCell(Text(provider.towers[index])),
+                      DataCell(Text(provider.floors[index])),
+                      DataCell(Text(provider.unitnos[index])),
+                      DataCell(Text(provider.areas[index])),
+                      DataCell(Text(provider.occupancys[index])),
+                      DataCell(Text(provider.staffnos[index])),
                         DataCell(
                           IconButton(
                             icon: const Icon(Icons.more_vert),
@@ -77,36 +79,35 @@ class _DatatableInsertState extends State<DatatableInsert> {
                                   context: context,
                                   position:  const RelativeRect.fromLTRB(350.0, 700.0, 0.0, 0.0),
                                   items: [
-                                    PopupMenuItem(
-                                      value: 'edit',
-                                      child: InkWell(
+                                    if (widget.isUpdate == true)
+                                      PopupMenuItem(
+                                        value: 'edit',
                                         child: Row(
                                           children: [
-                                            Icon(Icons.edit, size: 20,color: kDarkblueColor,),
-                                            const SizedBox(
-                                              width: 10,
+                                            Icon(Icons.edit, size: 20, color: kDarkblueColor),
+                                            const SizedBox(width: 10),
+                                            Text(
+                                              'Edit',
+                                              style: GoogleFonts.poppins(
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 17.0,
+                                              ),
                                             ),
-                                            Text('Edit', style: GoogleFonts.poppins(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 17.0,
-                                            )),
                                           ],
                                         ),
                                         onTap: () {
-                                          company.isEdited= true;
-                                          company.id1= index;
+                                          company.isEdited = true;
+                                          company.id1 = provider.ids[index];
 
-                                          company.towerCompany.text= widget.towers[index];
-                                          company.floor.text= widget.floors[index];
-                                          company.unitNo.text= widget.unitNos[index];
-                                          company.area.text= widget.areas[index];
-                                          company.occupancy.text= widget.occupancies[index];
-                                          company.staffNo.text= widget.staffNos[index];
-                                          Navigator.pop(context);
+                                          company.towerCompany.text = provider.towers[index];
+                                          company.floor.text = provider.floors[index];
+                                          company.unitNo.text = provider.unitnos[index];
+                                          company.area.text = provider.areas[index];
+                                          company.occupancy.text = provider.occupancys[index];
+                                          company.staffNo.text = provider.staffnos[index];
                                         },
                                       ),
-                                    ),
                                     PopupMenuItem(
                                       value: 'delete',
                                       child: InkWell(
@@ -124,8 +125,11 @@ class _DatatableInsertState extends State<DatatableInsert> {
                                           ],
                                         ),
                                         onTap: () {
-                                          Provider.of<DatatableProvider>(context, listen: false).deleteCompanyDataWithApi(index);
-                                          Provider.of<DatatableProvider>(context, listen: false).deleteCompanyData(index);
+                                          provider.deleteCompanyDataWithApi(index);
+                                          // Provider.of<DatatableProvider>(context, listen: false).deleteCompanyDataWithApi(index);
+                                          if(provider.add){
+                                            provider.deleteCompanyData(index);
+                                          }
                                           Navigator.pop(context);
                                         },
                                       ),

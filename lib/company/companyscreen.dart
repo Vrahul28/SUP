@@ -38,11 +38,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
 
   Future<void> _fetchCompanyListing() async {
     final companyProvider = context.read<CompanyProvider>();
-    await companyProvider.getCompany(
-      companyProvider.towerCodeClass.text,
-      companyProvider.companyCodeClass.text,
-      companyProvider.unitNoClass.text,
-    );
+    await companyProvider.getCompany();
   }
 
 
@@ -190,7 +186,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
 
                                       companyProvider.clearController();
                                       companyProvider.isSearchResult = false;
-                                      companyProvider.getCompany('', '', '');
+                                      companyProvider.getCompany();
                                     },
                                     style: ElevatedButton.styleFrom(
                                         backgroundColor: kDarkblueColor,

@@ -19,13 +19,14 @@ String tower= '';
 class Location extends StatefulWidget {
   final TextEditingController controller1;
   final String hint;
+  final FocusNode focusNode;
 
-  Location({
-    Key? key,
+  const Location({
+    super.key,
     required this.controller1,
     required this.hint,
-
-  }) : super(key: key);
+    required this.focusNode
+  });
 
   @override
   State<Location> createState() => _LocationState();
@@ -38,8 +39,9 @@ class _LocationState extends State<Location> {
     return Padding(
       padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
       child: TypeAheadField<Company?>(
-          hideWithKeyboard: true,
+        hideWithKeyboard: true,
         controller: widget.controller1,
+          focusNode: widget.focusNode,
           builder: (context, controller, focusNode) {
             return TextFormField(
               focusNode: focusNode,
@@ -153,12 +155,13 @@ Future<void> getFloor(String towerID) async{
 class FloorTextField extends StatefulWidget {
   final TextEditingController controller1;
   final String hint;
+  final FocusNode focusNode;
 
   const FloorTextField({
     super.key,
     required this.controller1,
     required this.hint,
-
+    required this.focusNode
   });
 
   @override
@@ -173,6 +176,7 @@ class _FloorTextFieldState extends State<FloorTextField> {
       padding: const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 15.0),
       child: TypeAheadField<int>(
         hideWithKeyboard: true,
+        focusNode: widget.focusNode,
         builder: (context, controller, focusNode) {
           return TextFormField(
             focusNode: focusNode,
